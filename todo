@@ -1,0 +1,39 @@
+Audiobook:
+	☐ Metadata extraction
+	Instead of users having to manually enter all data, we should try and
+	extract metadata from the file. ffmpeg offers a command to get metadata as a
+	json string on commandline. While ffmpeg and the commandline might not be
+	the most performat way to do this, its certainly supports the most formats.
+
+	Conversion:
+		☐ Identify the best or the best combination of file formats for browsers
+		Not all audio formats are supported by every browser. I remember from a
+		few years ago that there is no single codec with universal support. That
+		might have changed. In my mind it would at least be necessary to support
+		Firefox and Chrome and maybe Safari.
+
+		☐ Investigate whether files can be created on the fly
+		It would be wise to preserve the file that the user uploaded. This way
+		we have always have a reference file that we can use to do conversions
+		with a minimal loss of quality. An audiobook can, however, be relatively
+		large. It might be wise to see if it is possible to generate required
+		files on the file to save storage. There are multiple things that have
+		to be tested ...
+		1. Is it possible to provide
+
+	☐ Identify the best way to playback audiobooks with browsers
+	https://developer.mozilla.org/en-US/docs/Web/Guide/Audio_and_video_delivery/Live_streaming_web_audio_and_video
+	https://support.rackspace.com/how-to/streaming-audio-and-video-with-html-5/
+
+	☐ Get more information about a title using the internet
+	If we have a name, we can use online APIs to search for additional
+	information about the title and allow the user to automatically add it to
+	the metadata. This is a nice to have and might actually turn out to be not
+	all that helpful.
+
+eBook:
+	☐ Metadata extraction
+	I am uncertain if there are any projects that allow us to read metadata from
+	ebooks. However, it might be within the scope of the project to implement
+	enough of the ePub spec to extract and edit metadata.
+
