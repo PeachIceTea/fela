@@ -49,3 +49,6 @@ fela
 
 # VSCode settings
 .vscode
+
+# Test file folder
+files

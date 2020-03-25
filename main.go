@@ -2,7 +2,10 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
+	"os"
 
 	"github.com/julienschmidt/httprouter"
 	"github.com/rs/cors"
@@ -14,6 +17,28 @@ func main() {
 
 	r.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		JSONResponse(w, 200, m{"msg": "Hello, World!"})
+	})
+
+	r.POST("/upload", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		uploadFile, header, err := r.FormFile("file")
+		if err != nil {
+			JSONResponse(w, 500, m{"msg": "internal server error"})
+			return
+		}
+
+		osFile, err := os.OpenFile(fmt.Sprintf("files/%s", header.Filename), os.O_RDWR|os.O_CREATE, 0755)
+		if err != nil {
+			JSONResponse(w, 500, m{"msg": "internal server error"})
+			return
+		}
+
+		_, err = io.Copy(osFile, uploadFile)
+		if err != nil {
+			JSONResponse(w, 500, m{"msg": "internal server error"})
+			return
+		}
+
+		JSONResponse(w, 200, m{"msg": fmt.Sprintf("%s was successfully uploaded.", header.Filename)})
 	})
 
 	n := negroni.Classic()
