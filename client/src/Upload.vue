@@ -66,6 +66,7 @@ export default {
 				xhr.onload = function(e) {
 					//TODO: Handle finished upload
 					console.log("Upload is done", e)
+					console.log(xhr.response)
 				}
 
 				xhr.open("POST", "http://localhost:8080/upload")
