@@ -10,7 +10,7 @@
 				@dragover.stop.prevent="dragOver"
 			)
 				p.text Drag file here or click to upload file.
-			input(id="fileupload" type="file" @input="dialogFile")
+			input(id="fileupload" type="file" multiple @input="dialogFile")
 </template>
 
 <script>
@@ -72,6 +72,8 @@ export default {
 				xhr.open("POST", "http://localhost:8080/upload")
 				xhr.send(form)
 			}
+
+			e.srcElement.value = ""
 		},
 	},
 }
