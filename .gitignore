@@ -52,3 +52,6 @@ fela
 
 # Test file folder
 files
+
+# Go debug executable
+__debug_bin
