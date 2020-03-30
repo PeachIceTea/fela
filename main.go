@@ -1,8 +1,11 @@
 package main
 
 import (
+	"crypto/sha1"
+	"encoding/hex"
 	"encoding/json"
 	"fmt"
+	"io"
 	"net/http"
 	"os"
 	"os/exec"
@@ -25,58 +28,75 @@ func main() {
 		uploadFile, header, err := r.FormFile("file")
 		if err != nil {
 			fmt.Println(err)
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
 			return
 		}
 		defer uploadFile.Close()
 
-		path := fmt.Sprintf("%s/%s", c.FilePath, header.Filename)
-
-		osFile, err := os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0755)
+		filename, err := HashFile(uploadFile)
 		if err != nil {
 			fmt.Println(err)
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
 			return
 		}
-		defer osFile.Close()
 
-		info, err := AudiobookMetadata(path)
+		path := fmt.Sprintf("%s/%s", c.FilePath, filename)
+
+		_, err = os.Stat(path)
+		if err == nil {
+			JSONResponse(w, http.StatusConflict, conf.M{"error": "file already exists"})
+			return
+		}
+
+		if err := StoreFile(path, uploadFile); err != nil {
+			fmt.Println(err)
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
+			return
+		}
+
+		fileID, err := (func() (fileID int64, err error) {
+			info, err := AudiobookMetadata(path)
+			if err != nil {
+				return
+			}
+
+			tx, err := c.DB.Beginx()
+			if err != nil {
+				return
+			}
+			defer tx.Commit()
+
+			infoStr, err := json.Marshal(info)
+			if err != nil {
+				return
+			}
+
+			sqlStr, _ := c.TemplateString("file_insert", nil)
+			res, err := tx.Exec(sqlStr, header.Filename, filename, infoStr, "audiobook")
+			if err != nil {
+				tx.Rollback()
+				return
+			}
+
+			fileID, _ = res.LastInsertId()
+			return
+		})()
 		if err != nil {
 			fmt.Println(err)
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
+			os.Remove(path)
+			return
+		}
+		if fileID == 0 {
+			// Weird limbo where the file didn't exist on disk but did exist
+			// in the database. Might happen if user deletes file on disk.
+			JSONResponse(w, http.StatusOK, conf.M{"msg": "file reupload", "file_id": 0})
 			return
 		}
 
-		tx, err := c.DB.Beginx()
-		if err != nil {
-			fmt.Println(err)
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
-			return
-		}
-		defer tx.Commit()
+		JSONResponse(w, 200, conf.M{"file_id": fileID})
 
-		sqlStr, _ := c.TemplateString("file_insert", nil)
-
-		infoStr, err := json.Marshal(info)
-		if err != nil {
-			fmt.Println(err)
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
-			return
-		}
-
-		res, err := tx.Exec(sqlStr, header.Filename, infoStr, "audiobook")
-		if err != nil {
-			fmt.Println(err)
-			tx.Rollback()
-			JSONResponse(w, http.StatusInternalServerError, conf.M{"msg": "internal server error"})
-			return
-		}
-		if affected, _ := res.RowsAffected(); affected == 0 {
-			JSONResponse(w, http.StatusConflict, conf.M{"error": "username already in use"})
-			return
-		}
-
-		JSONResponse(w, 200, conf.M{"msg": fmt.Sprintf("%s was successfully uploaded.", header.Filename), "info": info})
+		return
 	})
 
 	r.ServeFiles("/files/*filepath", http.Dir(c.FilePath))
@@ -86,6 +106,42 @@ func main() {
 	n.UseHandler(r)
 
 	n.Run(":8080")
+}
+
+type file interface {
+	io.Reader
+	io.Seeker
+}
+
+func HashFile(f file) (s string, err error) {
+	_, err = f.Seek(0, io.SeekStart)
+	if err != nil {
+		return
+	}
+
+	sha := sha1.New()
+	_, err = io.Copy(sha, f)
+	if err != nil {
+		return
+	}
+
+	return hex.EncodeToString(sha.Sum(nil)), nil
+}
+
+func StoreFile(path string, f file) (err error) {
+	_, err = f.Seek(0, io.SeekStart)
+	if err != nil {
+		return
+	}
+
+	df, err := os.Create(path)
+	if err != nil {
+		return
+	}
+	defer df.Close()
+
+	_, err = io.Copy(df, f)
+	return
 }
 
 func AudiobookMetadata(path string) (info AudiobookInfo, err error) {

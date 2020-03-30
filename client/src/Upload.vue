@@ -1,8 +1,14 @@
 <template lang="pug">
 	.upload-container
 		.file-list
-			ul
-				li(v-for="file in files") {{ file.name }} - Progress: {{ file.progress }}%
+			.file(v-for="file in files")
+				span {{ file.name }} - Progress: {{ file.progress }}%
+				.meta-editor
+					input(id="title" placeholder="Book Title")
+					input(id="author" placeholder="Author")
+					input(id="series" placeholder="Series Name")
+					input(id="series-number" placeholder="Series Number")
+
 
 		label(for="fileupload")
 			.upload(
@@ -43,6 +49,7 @@ export default {
 				const status = {
 					name: file.name,
 					progress: 0,
+					fileID: 0,
 					file,
 				}
 
@@ -64,9 +71,14 @@ export default {
 				}
 
 				xhr.onload = function(e) {
-					//TODO: Handle finished upload
-					console.log("Upload is done", e)
-					console.log(xhr.response)
+					const id = xhr.response.file_id
+					if (id === 0) {
+						//TODO: Deal with reupload in some smart way
+						console.error("Reupload file")
+						return
+					}
+
+					status.fileID = id
 				}
 
 				xhr.open("POST", "http://localhost:8080/upload")
@@ -86,6 +98,7 @@ export default {
 	border: 2px dashed #000
 	position: relative
 	cursor: pointer
+	display: inline-block
 
 	> .text
 		margin: 0;
@@ -94,6 +107,10 @@ export default {
 		left: 50%;
 		margin-right: -50%;
 		transform: translate(-50%, -50%)
+
+.file
+	margin: 1.25em
+	border: 2px solid #000
 
 #fileupload
 	width: 1px
