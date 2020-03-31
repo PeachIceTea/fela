@@ -80,15 +80,24 @@ func (c *Config) LoadTemplates() {
 }
 
 // TemplateString - Returns after executing template
-func (c *Config) TemplateString(name string, data interface{}) (string, error) {
+func (c *Config) TemplateString(name string) string {
+	buf := bytes.Buffer{}
+	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), nil)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	return buf.String()
+}
+
+func (c *Config) TemplateWithData(name string, data interface{}) string {
 	buf := bytes.Buffer{}
 	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), &data)
 	if err != nil {
-		fmt.Println(err)
-		return "", err
+		log.Fatal(err)
 	}
 
-	return buf.String(), err
+	return buf.String()
 }
 
 // M - Shortcut for map

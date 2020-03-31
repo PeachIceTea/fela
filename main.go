@@ -71,8 +71,7 @@ func main() {
 				return
 			}
 
-			sqlStr, _ := c.TemplateString("file_insert", nil)
-			res, err := tx.Exec(sqlStr, header.Filename, filename, infoStr, "audiobook")
+			res, err := tx.Exec(c.TemplateString("file_insert"), header.Filename, filename, infoStr, "audiobook")
 			if err != nil {
 				tx.Rollback()
 				return
@@ -97,6 +96,85 @@ func main() {
 		JSONResponse(w, 200, conf.M{"file_id": fileID})
 
 		return
+	})
+
+	r.POST("/book/create", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		var data struct {
+			Title       string `json:"title"`
+			Author      string `json:"author"`
+			Description string `json:"description"`
+			FileID      int64  `json:"file_id"`
+		}
+
+		err := JSONBody(&data, r)
+		if err != nil {
+			JSONResponse(w, http.StatusBadRequest, conf.M{"error": "not valid json"})
+			return
+		}
+
+		fmt.Println(data)
+
+		if data.Title == "" || data.Author == "" || data.FileID == 0 {
+			JSONResponse(w, http.StatusBadRequest, conf.M{"error": "data missing"})
+			return
+		}
+
+		unassigned, err := (func() (u bool, err error) {
+			var file struct {
+				Book *int64 `db:"book"`
+			}
+
+			err = c.DB.Get(&file, c.TemplateWithData("file_select_by_id", []string{"book"}), data.FileID)
+			if err != nil {
+				return
+			}
+
+			u = file.Book == nil
+			return
+		})()
+		if err != nil {
+			JSONResponse(w, http.StatusBadRequest, conf.M{"error": "cannot find file"})
+			return
+		}
+		if !unassigned {
+			//TODO: Enable option to reassign books
+			JSONResponse(w, http.StatusBadRequest, conf.M{"error": "file already assigned"})
+			return
+		}
+
+		err = (func() (err error) {
+			tx, err := c.DB.Beginx()
+			if err != nil {
+				return
+			}
+			defer tx.Commit()
+
+			res, err := tx.Exec(c.TemplateString("book_insert"), data.Author, data.Title, data.Description)
+			if err != nil {
+				tx.Rollback()
+				return
+			}
+
+			bookID, err := res.LastInsertId()
+			if err != nil {
+				tx.Rollback()
+				return
+			}
+
+			_, err = tx.Exec(c.TemplateString("file_assign_book"), bookID, data.FileID)
+			if err != nil {
+				return
+			}
+
+			return
+		})()
+		if err != nil {
+			fmt.Println(err)
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
+			return
+		}
+
+		JSONResponse(w, http.StatusOK, conf.M{"msg": "book has been created"})
 	})
 
 	r.ServeFiles("/files/*filepath", http.Dir(c.FilePath))
