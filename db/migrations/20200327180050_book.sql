@@ -6,7 +6,7 @@ CREATE TABLE IF NOT EXISTS book (
 	author VARCHAR(255) NOT NULL,
 	description TEXT,
 
-	addtional_metadata JSON,
+	metadata JSON,
 
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP

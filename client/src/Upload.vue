@@ -17,7 +17,7 @@
 </template>
 
 <script>
-import UploadMetadata from "./UploadMetadata"
+import UploadMetadata from "./UploadMetadata.vue"
 
 export default {
 	data() {

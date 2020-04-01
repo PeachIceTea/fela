@@ -98,6 +98,19 @@ func main() {
 		return
 	})
 
+	r.GET("/book", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		var book []Book
+
+		err := c.DB.Select(&book, c.TemplateString("book_all"))
+		if err != nil {
+			fmt.Println(err)
+			JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
+			return
+		}
+
+		JSONResponse(w, http.StatusOK, &book)
+	})
+
 	r.POST("/book/create", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		var data struct {
 			Title       string `json:"title"`
@@ -184,6 +197,18 @@ func main() {
 	n.UseHandler(r)
 
 	n.Run(":8080")
+}
+
+type Book struct {
+	ID     int64  `db:"id" json:"id"`
+	Title  string `db:"title" json:"title"`
+	Author string `db:"author" json:"author"`
+
+	Description *string `db:"description" json:"description,omitempty"`
+	Metadata    *string `db:"metadata" json:"metadata,omitempty"`
+
+	CreatedAt string  `db:"created_at" json:"created_at"`
+	UpdatedAt *string `db:"updated_at" json:"updated_at,omitempty"`
 }
 
 type file interface {

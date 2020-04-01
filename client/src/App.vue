@@ -1,12 +1,7 @@
 <template lang="pug">
 	.app
-		Upload
+		router-view
+		br
+		br
+		router-link(to="/") Back to home
 </template>
-
-<script>
-import Upload from "./Upload.vue"
-
-export default {
-	components: { Upload },
-}
-</script>
