@@ -4,11 +4,14 @@
 			div
 				input(id="title" v-model="title" placeholder="Book Title")
 			div
-				input(id="author" v-model="author" placeholder="Author")
+				input(id="author" v-model="author" list="author_list" placeholder="Author")
 			div
 				textarea(id="description" v-model="description" placeholder="Description (optional)")
 			div
 				input(type="submit" :disabled="disableButton")
+
+		datalist#author_list
+			option(v-for="author in authorList" :value="author")
 
 </template>
 
@@ -22,11 +25,27 @@ export default {
 			title: "",
 			author: "",
 			description: "",
+			authorList: [],
+		}
+	},
+	async created() {
+		try {
+			const res = await fetch("http://localhost:8080/author")
+
+			if (res.status === 200) {
+				this.authorList = await res.json()
+			}
+		} catch (e) {
+			// Its not too bad if we cannot get the list
 		}
 	},
 	methods: {
 		submit() {
-			this.callback(this.file, Object.assign({}, this.$data))
+			this.callback(this.file, {
+				title: this.title,
+				author: this.author,
+				description: this.description,
+			})
 		},
 	},
 	computed: {

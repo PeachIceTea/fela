@@ -20,9 +20,13 @@ func main() {
 	})
 
 	routes.Upload(r, &c)
+
 	routes.BookCreate(r, &c)
 	routes.BookList(r, &c)
 	routes.Book(r, &c)
+
+	routes.AuthorList(r, &c)
+	routes.Author(r, &c)
 
 	r.ServeFiles("/files/*filepath", http.Dir(c.FilePath))
 
