@@ -81,7 +81,8 @@ func (c *Config) LoadTemplates() {
 	c.Templates = template.Must(template.ParseGlob("db/templates/*.sql"))
 }
 
-// TemplateString - Returns after executing template
+// TemplateString - Returns given template
+// Panics if template is not found
 func (c *Config) TemplateString(name string) string {
 	buf := bytes.Buffer{}
 	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), nil)
@@ -92,6 +93,8 @@ func (c *Config) TemplateString(name string) string {
 	return buf.String()
 }
 
+// TemplateWithData - Returns given template, accepts data to be passed to template
+// Panics if template is not found
 func (c *Config) TemplateWithData(name string, data interface{}) string {
 	buf := bytes.Buffer{}
 	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), &data)

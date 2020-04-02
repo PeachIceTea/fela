@@ -107,6 +107,7 @@ type AudiobookInfo struct {
 	} `json:"format"`
 }
 
+// Scan - Turns string into AudiobookInfo struct - used by database/sql
 func (a *AudiobookInfo) Scan(src interface{}) error {
 	if src == nil {
 		return nil
