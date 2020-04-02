@@ -2,8 +2,10 @@ package conf
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"net/url"
 	"os"
 	"text/template"
@@ -100,5 +102,24 @@ func (c *Config) TemplateWithData(name string, data interface{}) string {
 	return buf.String()
 }
 
-// M - Shortcut for map
-type M map[string]interface{}
+// JSONBody - Get JSON Body from request
+func JSONBody(e interface{}, r *http.Request) (err error) {
+	err = json.NewDecoder(r.Body).Decode(e)
+	return
+}
+
+// JSONResponse - Respond with JSON
+func JSONResponse(w http.ResponseWriter, status int, body interface{}) {
+	b, err := json.Marshal(body)
+	if err != nil {
+		panic(err)
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(status)
+
+	_, err = w.Write(b)
+	if err != nil {
+		panic(err)
+	}
+}
