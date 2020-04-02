@@ -51,7 +51,8 @@ fela
 .vscode
 
 # Test file folder
-files
+files/*
+!files/.gitkeep
 
 # Go debug executable
 __debug_bin
