@@ -1,6 +1,7 @@
 package routes
 
 import (
+	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -43,8 +44,12 @@ func BookCreate(r *httprouter.Router, c *conf.Config) {
 			u = file.Book == nil
 			return
 		})()
-		if err != nil {
+		if err == sql.ErrNoRows {
 			conf.JSONResponse(w, http.StatusBadRequest, conf.M{"error": "cannot find file"})
+			return
+		} else if err != nil {
+			fmt.Println(err)
+			conf.JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
 			return
 		}
 		if !unassigned {

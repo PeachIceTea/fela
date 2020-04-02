@@ -1,5 +1,10 @@
 package conf
 
+import (
+	"encoding/json"
+	"errors"
+)
+
 // M - Shortcut for map
 type M map[string]interface{}
 
@@ -102,6 +107,33 @@ type AudiobookInfo struct {
 	} `json:"format"`
 }
 
+func (a *AudiobookInfo) Scan(src interface{}) error {
+	if src == nil {
+		return nil
+	}
+
+	var source []byte
+
+	switch src.(type) {
+	case string:
+		{
+			source = []byte(src.(string))
+		}
+
+	case []byte:
+		{
+			source = src.([]byte)
+		}
+
+	default:
+		{
+			return errors.New("incompatible type for AudiobookInfo")
+		}
+	}
+
+	return json.Unmarshal(source, a)
+}
+
 // Book - Stores database book info
 type Book struct {
 	ID     int64  `db:"id" json:"id"`
@@ -110,6 +142,21 @@ type Book struct {
 
 	Description *string `db:"description" json:"description,omitempty"`
 	Metadata    *string `db:"metadata" json:"metadata,omitempty"`
+
+	CreatedAt string  `db:"created_at" json:"created_at"`
+	UpdatedAt *string `db:"updated_at" json:"updated_at,omitempty"`
+}
+
+// File - Stores database file info
+type File struct {
+	ID   int64  `db:"id" json:"id"`
+	Name string `db:"name" json:"name"`
+	Hash string `db:"hash" json:"hash"`
+
+	Metadata *AudiobookInfo `db:"metadata" json:"metadata"`
+	Kind     string         `db:"kind" json:"kind"`
+
+	Book int64 `db:"book" json:"book"`
 
 	CreatedAt string  `db:"created_at" json:"created_at"`
 	UpdatedAt *string `db:"updated_at" json:"updated_at,omitempty"`
