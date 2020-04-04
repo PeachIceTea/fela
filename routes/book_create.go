@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"database/sql"
 	"fmt"
 	"net/http"
 
@@ -10,14 +9,13 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// BookCreate - /book/create - Creates a new book entry and links a file
+// BookCreate - POST book/create - Creates a new book entry and links a file
 func BookCreate(r *httprouter.Router, c *conf.Config) {
 	r.POST("/book/create", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
 		var data struct {
 			Title       string `json:"title"`
 			Author      string `json:"author"`
 			Description string `json:"description"`
-			FileID      int64  `json:"file_id"`
 		}
 
 		err := conf.JSONBody(&data, r)
@@ -26,39 +24,12 @@ func BookCreate(r *httprouter.Router, c *conf.Config) {
 			return
 		}
 
-		if data.Title == "" || data.Author == "" || data.FileID == 0 {
+		if data.Title == "" || data.Author == "" {
 			conf.JSONResponse(w, http.StatusBadRequest, conf.M{"error": "data missing"})
 			return
 		}
 
-		unassigned, err := (func() (u bool, err error) {
-			var file struct {
-				Book *int64 `db:"book"`
-			}
-
-			err = c.DB.Get(&file, c.TemplateWithData("file_select_by_id", []string{"book"}), data.FileID)
-			if err != nil {
-				return
-			}
-
-			u = file.Book == nil
-			return
-		})()
-		if err == sql.ErrNoRows {
-			conf.JSONResponse(w, http.StatusBadRequest, conf.M{"error": "cannot find file"})
-			return
-		} else if err != nil {
-			fmt.Println(err)
-			conf.JSONResponse(w, http.StatusInternalServerError, conf.M{"error": "internal server error"})
-			return
-		}
-		if !unassigned {
-			//TODO: Enable option to reassign books
-			conf.JSONResponse(w, http.StatusBadRequest, conf.M{"error": "file already assigned"})
-			return
-		}
-
-		err = (func() (err error) {
+		bookID, err := (func() (bookID int64, err error) {
 			tx, err := c.DB.Beginx()
 			if err != nil {
 				return
@@ -71,14 +42,9 @@ func BookCreate(r *httprouter.Router, c *conf.Config) {
 				return
 			}
 
-			bookID, err := res.LastInsertId()
+			bookID, err = res.LastInsertId()
 			if err != nil {
 				tx.Rollback()
-				return
-			}
-
-			_, err = tx.Exec(c.TemplateString("file_assign_book"), bookID, data.FileID)
-			if err != nil {
 				return
 			}
 
@@ -90,6 +56,6 @@ func BookCreate(r *httprouter.Router, c *conf.Config) {
 			return
 		}
 
-		conf.JSONResponse(w, http.StatusOK, conf.M{"msg": "book has been created"})
+		conf.JSONResponse(w, http.StatusOK, conf.M{"book_id": bookID})
 	})
 }

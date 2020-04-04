@@ -15,9 +15,10 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// Upload - /upload - Handles file uploads
+// Upload -  POST /book/upload - Handles file uploads
 func Upload(r *httprouter.Router, c *conf.Config) {
-	r.POST("/upload", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+	r.POST("/book/upload", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
+		//TODO: Detect and handle ebooks
 		uploadFile, header, err := r.FormFile("file")
 		if err != nil {
 			fmt.Println(err)
@@ -64,7 +65,7 @@ func Upload(r *httprouter.Router, c *conf.Config) {
 				return
 			}
 
-			res, err := tx.Exec(c.TemplateString("file_insert"), header.Filename, filename, infoStr, "audiobook")
+			res, err := tx.Exec(c.TemplateString("audio_file_insert"), header.Filename, filename, infoStr)
 			if err != nil {
 				tx.Rollback()
 				return
