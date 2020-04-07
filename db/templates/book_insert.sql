@@ -1,2 +1,2 @@
-INSERT INTO `book` (author, title, description)
-VALUES (?, ?, ?)
+INSERT INTO book (title, author)
+VALUES (?, ?)

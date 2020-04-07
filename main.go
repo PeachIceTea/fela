@@ -3,9 +3,8 @@ package main
 import (
 	"net/http"
 
-	"github.com/julienschmidt/httprouter"
-	"github.com/rs/cors"
-	"github.com/urfave/negroni"
+	"github.com/gin-contrib/cors"
+	"github.com/gin-gonic/gin"
 
 	"github.com/PeachIceTea/fela/conf"
 	"github.com/PeachIceTea/fela/routes"
@@ -13,26 +12,30 @@ import (
 
 func main() {
 	c := conf.Init()
-	r := httprouter.New()
+	r := gin.Default()
 
-	r.GET("/", func(w http.ResponseWriter, r *http.Request, ps httprouter.Params) {
-		conf.JSONResponse(w, http.StatusOK, conf.M{"msg": "Hello, World!"})
+	corsConfig := cors.DefaultConfig()
+	corsConfig.AllowOrigins = []string{"http://localhost:1234"}
+	r.Use(cors.New(corsConfig))
+
+	r.GET("/", func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H{"msg": "Hello, World!"})
 	})
 
-	routes.Upload(r, &c)
+	r.NoRoute(func(c *gin.Context) {
+		c.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
+	})
 
-	routes.BookCreate(r, &c)
-	routes.BookList(r, &c)
-	routes.Book(r, &c)
+	v1 := r.Group("/api/v1")
+	{
+		routes.GetBooks(v1, c)
+		routes.GetBook(v1, c)
+		routes.NewBook(v1, c)
+		routes.NewAudiobook(v1, c)
 
-	routes.AuthorList(r, &c)
-	routes.Author(r, &c)
+		routes.Upload(v1, c)
+		routes.AssignFiles(v1, c)
+	}
 
-	r.ServeFiles("/files/*filepath", http.Dir(c.FilePath))
-
-	n := negroni.Classic()
-	n.Use(cors.New(cors.Options{}))
-	n.UseHandler(r)
-
-	n.Run(":8080")
+	r.Run()
 }
