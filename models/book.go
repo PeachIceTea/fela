@@ -10,8 +10,8 @@ type Book struct {
 	Title  string `db:"title" json:"title"`
 	Author string `db:"author" json:"author"`
 
-	CreatedAt string `db:"created_at" json:"created_at"`
-	UpdatedAt string `db:"updated_at" json:"updated_at"`
+	CreatedAt string  `db:"created_at" json:"created_at"`
+	UpdatedAt *string `db:"updated_at" json:"updated_at"`
 }
 
 func (b *Book) Insert(c *conf.Config) (err error) {

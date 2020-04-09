@@ -36,6 +36,10 @@ export default {
 			return this.$store.state.upload.uploads
 		},
 	},
+	created() {
+		console.log("hi")
+		this.$store.dispatch("book/getAuthors")
+	},
 	components: { Upload },
 }
 </script>

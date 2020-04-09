@@ -66,26 +66,3 @@ func GetBook(r *gin.RouterGroup, c *conf.Config) {
 		ctx.JSON(http.StatusOK, gin.H{"book": b, "audiobooks": a})
 	})
 }
-
-func NewAudiobook(r *gin.RouterGroup, c *conf.Config) {
-	r.POST("/audiobook/new", func(ctx *gin.Context) {
-		var data struct {
-			BookID int64 `json:"book_id"`
-		}
-		err := ctx.BindJSON(&data)
-		if err != nil {
-			badRequest(ctx, "non json body")
-			return
-		}
-
-		a := models.Audiobook{
-			Book: data.BookID,
-		}
-		err = a.Insert(c)
-		if err != nil {
-			panic(err)
-		}
-
-		ctx.JSON(http.StatusOK, gin.H{"audiobook_id": a.ID})
-	})
-}

@@ -10,8 +10,8 @@
 				button(@click="setChapterized(false)") Multiple Books
 				button(@click="setChapterized(true)") Single Book
 			div(v-else)
-				BookForm(v-if="upload.files.length === 1 || upload.chapterized" :callback="submitCallback")
-				BookForm(v-else v-for="book in upload.files" :book="book" :callback="submitCallback")
+				BookForm(v-if="upload.files.length === 1 || upload.chapterized" :callback="submitCallback" :upload="upload")
+				BookForm(v-else v-for="book in upload.files" :book="book" :callback="submitCallback" :upload="upload")
 
 </template>
 

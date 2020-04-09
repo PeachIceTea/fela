@@ -1,5 +1,5 @@
 <template lang="pug">
-	.book-form
+	.book-form(v-if="!formDone")
 		.file-name(v-if="book") {{book.name}}
 		form.book-form(@submit.prevent="submit")
 			label
@@ -9,7 +9,7 @@
 			label
 				p Author
 				p
-					input(type="text" v-model="author")
+					input(type="text" v-model="author" list="authors")
 			//label
 				p Series
 				p
@@ -20,7 +20,9 @@
 					input(type="text" v-model="no")
 			label
 				p
-					input(type="submit" value="Submit" :disabled="disabled")
+					input(type="submit" value="Submit" :disabled="disabledButton")
+			datalist#authors
+				option(v-for="author in authors" :value="author")
 </template>
 
 <script>
@@ -34,8 +36,18 @@ export default {
 		}
 	},
 	computed: {
-		disabled() {
+		formDone() {
+			if (this.book) {
+				return this.book.done
+			} else {
+				return this.upload.done
+			}
+		},
+		disabledButton() {
 			return !(this.title && this.author)
+		},
+		authors() {
+			return this.$store.state.book.authors
 		},
 	},
 	methods: {
@@ -46,6 +58,7 @@ export default {
 	props: {
 		book: File,
 		callback: Function,
+		upload: Object,
 	},
 }
 </script>

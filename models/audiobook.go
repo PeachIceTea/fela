@@ -45,3 +45,14 @@ func (a *Audiobook) AssignFiles(assignments []AudiobookAssignment, c *conf.Confi
 
 	return
 }
+
+func (a *Audiobook) Files(c *conf.Config) (fl []*File, err error) {
+	err = c.DB.Select(&fl, c.TemplateString("file_select_by_audiobook_id"), a.ID)
+	return
+}
+
+func GetAudiobook(id int64, c *conf.Config) (a *Audiobook, err error) {
+	a = &Audiobook{}
+	err = c.DB.Get(a, c.TemplateString("audiobook_select_by_id"), id)
+	return
+}

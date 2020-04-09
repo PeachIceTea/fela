@@ -3,7 +3,8 @@
 		p {{book.title}} by {{book.author}}
 		br
 		p Audiobooks
-		p(v-for="audiobook, i in audiobooks") Audiobook {{audiobook.id}}
+		p(v-for="audiobook, i in audiobooks")
+			router-link(:to="`/audiobook/${audiobook.id}`") Audiobook {{audiobook.id}}
 </template>
 
 <script>

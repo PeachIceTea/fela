@@ -4,6 +4,7 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"github.com/PeachIceTea/fela/conf"
@@ -22,6 +23,8 @@ func main() {
 		c.JSON(http.StatusOK, gin.H{"msg": "Hello, World!"})
 	})
 
+	r.Use(static.Serve("/files", static.LocalFile("files", false)))
+
 	r.NoRoute(func(c *gin.Context) {
 		c.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
 	})
@@ -31,6 +34,9 @@ func main() {
 		routes.GetBooks(v1, c)
 		routes.GetBook(v1, c)
 		routes.NewBook(v1, c)
+		routes.GetAuthors(v1, c)
+
+		routes.GetAudiobook(v1, c)
 		routes.NewAudiobook(v1, c)
 
 		routes.Upload(v1, c)

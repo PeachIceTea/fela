@@ -27,11 +27,9 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
-		if len(files) > 1 {
-			sort.Slice(files, func(i, j int) bool {
-				return files[i].Filename < files[j].Filename
-			})
-		}
+		sort.Slice(files, func(i, j int) bool {
+			return files[i].Filename < files[j].Filename
+		})
 
 		var wg sync.WaitGroup
 		type fileResponse struct {
@@ -41,22 +39,21 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 		ids := make([]fileResponse, len(files))
 		for i, f := range files {
 			wg.Add(1)
-			go func(i int, f *multipart.FileHeader) {
-				mf := models.File{Name: f.Filename}
+			go func(i int, h *multipart.FileHeader) {
+				f := models.File{Name: h.Filename}
 
-				fs, err := f.Open()
+				fs, err := h.Open()
 				if err != nil {
-					//TODO: Figure out the best thing to do when a file fails
 					//TODO: Delete already saved files on error
 					panic(err)
 				}
 
-				err = mf.Insert(fs, c)
+				err = f.Insert(fs, c)
 				if err != nil {
 					panic(err)
 				}
 
-				ids[i] = fileResponse{f.Filename, mf.ID}
+				ids[i] = fileResponse{h.Filename, f.ID}
 				wg.Done()
 			}(i, f)
 		}
