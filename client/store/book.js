@@ -6,7 +6,6 @@ export default {
 		books: [],
 		book: {},
 		audiobooks: [],
-		files: null,
 		authors: [],
 	},
 	getters: {},
@@ -23,10 +22,6 @@ export default {
 			).json()
 			commit("setBook", { book, audiobooks })
 		},
-		async getAudiobook({ commit }, id) {
-			const { files } = await (await apiCall(`/audiobook/${id}`)).json()
-			commit("setFiles", { files })
-		},
 		async getAuthors({ commit }) {
 			const { authors } = await (await apiCall("/author")).json()
 			commit("setAuthors", { authors })
@@ -39,9 +34,6 @@ export default {
 		setBook(state, { book, audiobooks }) {
 			state.book = book
 			state.audiobooks = audiobooks
-		},
-		setFiles(state, { files }) {
-			state.files = files
 		},
 		setAuthors(state, { authors }) {
 			state.authors = authors

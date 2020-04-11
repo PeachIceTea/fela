@@ -7,7 +7,6 @@ import App from "./components/App.vue"
 import Home from "./components/Home.vue"
 import Books from "./components/Books.vue"
 import Book from "./components/Book"
-import Audiobook from "./components/Audiobook"
 import Upload from "./components/Upload"
 import NotFound from "./components/NotFound.vue"
 
@@ -23,8 +22,6 @@ new Vue({
 
 			{ path: "/book", component: Books },
 			{ path: "/book/:id", component: Book, name: "book" },
-
-			{ path: "/audiobook/:id", component: Audiobook, name: "audiobook" },
 
 			{ path: "/upload", component: Upload },
 			{ path: "*", component: NotFound },

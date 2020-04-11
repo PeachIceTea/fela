@@ -3,6 +3,7 @@ import Vuex from "vuex"
 
 import upload from "./upload"
 import book from "./book"
+import player from "./player"
 
 Vue.use(Vuex)
 
@@ -22,6 +23,6 @@ export function apiPOST(path, body, options = { headers: {} }) {
 }
 
 export default new Vuex.Store({
-	modules: { upload, book },
+	modules: { upload, book, player },
 	strict: true,
 })

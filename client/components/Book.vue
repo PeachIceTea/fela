@@ -4,7 +4,7 @@
 		br
 		p Audiobooks
 		p(v-for="audiobook, i in audiobooks")
-			router-link(:to="`/audiobook/${audiobook.id}`") Audiobook {{audiobook.id}}
+			button(@click="play(audiobook)") Play Audiobook
 </template>
 
 <script>
@@ -15,6 +15,11 @@ export default {
 		},
 		audiobooks() {
 			return this.$store.state.book.audiobooks
+		},
+	},
+	methods: {
+		play(audiobook) {
+			this.$store.dispatch("player/getFiles", audiobook.id)
 		},
 	},
 	beforeRouteEnter(to, from, next) {
