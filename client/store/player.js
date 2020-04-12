@@ -4,8 +4,6 @@ const defaultState = {
 	book: {},
 	audiobook: {},
 	files: [],
-	file: {},
-	fileIndex: -1,
 }
 
 export default {
@@ -21,7 +19,6 @@ export default {
 				await apiCall(`/audiobook/${audiobook.id}`)
 			).json()
 			commit("setFiles", { files })
-			commit("setCurrentFile", { index: 0 })
 		},
 	},
 	mutations: {
@@ -34,10 +31,6 @@ export default {
 		},
 		setFiles(state, { files }) {
 			state.files = files
-		},
-		setCurrentFile(state, { index }) {
-			state.file = state.files[index]
-			state.fileIndex = index
 		},
 	},
 }

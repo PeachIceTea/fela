@@ -12,19 +12,22 @@
 					Pause(v-show="!paused")
 					Play(v-show="paused")
 			.col
-			audio(:src="`http://localhost:8080/files/${file.hash}`" ref="audio" autoplay)
 		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ duration * (hoverPercent / 100) | formatDuration }}
+		audio(:src="fileURL" ref="audio" autoplay)
 </template>
 
 <script>
+import { mapState } from "vuex"
+
 import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
 
 export default {
 	data() {
 		return {
-			timestamp: 0,
-			duration: 0,
+			currentTime: 0,
+			currentFileIndex: 0,
+			fileDuration: 0,
 			paused: true,
 			hoverInfo: false,
 			hoverPercent: 0,
@@ -33,27 +36,60 @@ export default {
 			},
 		}
 	},
-	computed: {
-		book() {
-			return this.$store.state.player.book
+	computed: Object.assign(
+		{
+			progress() {
+				return (this.timestamp / this.duration) * 100
+			},
+			duration() {
+				if (this.files.length > 1) {
+					return this.audiobook.duration
+				} else {
+					return this.fileDuration
+				}
+			},
+			timestamp() {
+				const len = this.files.length
+				if (len > 1) {
+					let time = this.currentTime
+					for (let i = 0; i < this.currentFileIndex; i++) {
+						time += this.files[i].duration
+					}
+					return time
+				} else {
+					return this.currentTime
+				}
+			},
+			file() {
+				if (this.files[0]) {
+					return this.files[this.currentFileIndex]
+				} else {
+					return {}
+				}
+			},
+			fileURL() {
+				return this.file.hash
+					? `http://localhost:8080/files/${this.file.hash}`
+					: ""
+			},
 		},
-		file() {
-			return this.$store.state.player.file
-		},
-		progress() {
-			return (this.timestamp / this.duration) * 100
-		},
-	},
+		mapState("player", ["book", "audiobook", "files"]),
+	),
 	created() {
 		document.addEventListener("keydown", this.spaceHandler)
 	},
 	mounted() {
 		const audio = this.$refs.audio
 		audio.addEventListener("timeupdate", e => {
-			this.timestamp = audio.currentTime
+			this.currentTime = audio.currentTime
 		})
 		audio.addEventListener("durationchange", e => {
-			this.duration = audio.duration
+			this.fileDuration = audio.duration
+		})
+		audio.addEventListener("ended", e => {
+			if (this.files.length > 1) {
+				this.currentFileIndex++
+			}
 		})
 		audio.addEventListener("play", e => (this.paused = false))
 		audio.addEventListener("pause", e => (this.paused = true))
@@ -82,9 +118,30 @@ export default {
 			this.hoverInfo = false
 		},
 		jump(e) {
-			console.log(this.duration * (e.clientX / screen.width))
-			this.$refs.audio.currentTime =
-				this.duration * (e.clientX / screen.width)
+			let d = this.duration * (e.clientX / screen.width)
+
+			let fileIndex = 0
+			for (let i = 0, len = this.files.length, t = 0; i < len; i++) {
+				const file = this.files[i]
+				if (d < t + file.duration) {
+					d -= t
+					fileIndex = i
+					break
+				}
+
+				t += file.duration
+			}
+
+			if (this.currentFileIndex !== fileIndex) {
+				this.currentFileIndex = fileIndex
+				const tmp = () => {
+					this.$refs.audio.currentTime = d
+					this.$refs.audio.removeEventListener("loadeddata", tmp)
+				}
+				this.$refs.audio.addEventListener("loadeddata", tmp)
+			} else {
+				this.$refs.audio.currentTime = d
+			}
 		},
 	},
 	components: { Play, Pause },
@@ -143,7 +200,7 @@ progressBarHeight = 1.5em
 	height: 100%
 	width: 0%
 	background: #fff
-	transition: 100ms all ease
+	transition: 250ms all ease
 
 .hover-info
 	position: absolute

@@ -1,9 +1,10 @@
 <template lang="pug">
 	.navbar
-		router-link(to="/").nav-el Library
-		router-link(to="/upload").nav-el Upload
+		router-link.nav-el(to="/") Library
+		router-link.nav-el(to="/upload") Upload
 		.nav-el.nav-break
-		router-link(to="/404").nav-el Logout
+		router-link.nav-el(to="/settings") Settings
+		router-link.nav-el(to="/404") Logout
 </template>
 
 <style lang="stylus" scoped>
@@ -30,4 +31,8 @@
 
 	&:hover
 		background: #333
+
+.nav-break
+	background: transparent !important
+	cursor: default
 </style>
