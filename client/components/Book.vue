@@ -1,10 +1,11 @@
 <template lang="pug">
 	.book
-		p {{book.title}} by {{book.author}}
-		br
-		p Audiobooks
-		p(v-for="audiobook, i in audiobooks")
-			button(@click="play(audiobook)") Play Audiobook
+		.info
+			h2 {{book.title}} by {{book.author}}
+		.audiobooks
+			h2 Audiobooks
+			.list
+				button.item(v-for="audiobook in audiobooks" @click="play(audiobook)") Play Audiobook \#{{audiobook.id}}
 </template>
 
 <script>
@@ -19,7 +20,7 @@ export default {
 	},
 	methods: {
 		play(audiobook) {
-			this.$store.dispatch("player/getFiles", audiobook.id)
+			this.$store.dispatch("player/play", { audiobook, book: this.book })
 		},
 	},
 	beforeRouteEnter(to, from, next) {

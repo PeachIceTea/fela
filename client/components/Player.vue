@@ -1,64 +1,165 @@
 <template lang="pug">
 	.player
-		button.play-btn(@click="play" :class="{playing: playing}") Play
-		audio(:src="`http://localhost:8080/files/${file.hash}`" ref="audio")
+		.progress-container
+			.progress-bar(@mousemove="hover" @mouseleave="hideInfo" ref="progressBar" @click="jump")
+				.played(:style="{width: `${progress}%`}")
+		.everything-else
+			.info.col
+				.book-info {{ book.title }} by {{ book.author }}
+				.progress {{ formatTime(timestamp) }} / {{ formatTime(duration) }}
+			.controls.col
+				.play-btn(@click="toogle")
+					Pause(v-show="!paused")
+					Play(v-show="paused")
+			.col
+			audio(:src="`http://localhost:8080/files/${file.hash}`" ref="audio" autoplay)
+		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ formatTime(duration * (hoverPercent / 100)) }}
 </template>
 
 <script>
+import Play from "./svg/Play.vue"
+import Pause from "./svg/Pause.vue"
+
 export default {
 	data() {
-		return {}
-	}
+		return {
+			timestamp: 0,
+			duration: 0,
+			paused: true,
+			hoverInfo: false,
+			hoverPercent: 0,
+			hoverStyle: {
+				left: "0px",
+			},
+		}
+	},
 	computed: {
+		book() {
+			return this.$store.state.player.book
+		},
 		file() {
 			return this.$store.state.player.file
 		},
-		playing() {
-			return this.$refs.audio && !this.$refs.audio.paused
+		progress() {
+			return (this.timestamp / this.duration) * 100
 		},
+	},
+	created() {
+		document.addEventListener("keydown", this.spaceHandler)
+	},
+	mounted() {
+		const audio = this.$refs.audio
+		audio.addEventListener("timeupdate", e => {
+			this.timestamp = audio.currentTime
+		})
+		audio.addEventListener("durationchange", e => {
+			this.duration = audio.duration
+		})
+		audio.addEventListener("play", e => (this.paused = false))
+		audio.addEventListener("pause", e => (this.paused = true))
+	},
+	destroyed() {
+		document.removeEventListener("keydown", this.spaceHandler)
 	},
 	methods: {
-		play() {
-			this.$refs.audio.play()
+		toogle() {
+			const audio = this.$refs.audio
+			if (audio) audio.paused ? audio.play() : audio.pause()
+		},
+		spaceHandler(e) {
+			if (e.key === " ") this.toogle()
+		},
+		formatTime(time) {
+			const hours = Math.floor(time / (60 * 60))
+			time -= hours * 60 * 60
+
+			const minutes = this.fillZero(Math.floor(time / 60))
+			time -= minutes * 60
+
+			const seconds = this.fillZero(Math.floor(time))
+			return `${hours}:${minutes}:${seconds}`
+		},
+		fillZero(time) {
+			time = time.toString()
+			return time.length < 2 ? `0${time}` : time
+		},
+		hover(e) {
+			this.hoverInfo = true
+			this.hoverPercent = (e.clientX / screen.width) * 100
+
+			const width = this.$refs.hoverInfo.offsetWidth
+			const max = screen.width - width
+			const left = Math.min(Math.max(e.clientX - width / 2, 0), max)
+			this.hoverStyle.left = `${left}px`
+		},
+		hideInfo() {
+			this.hoverInfo = false
+		},
+		jump(e) {
+			console.log(this.duration * (e.clientX / screen.width))
+			this.$refs.audio.currentTime =
+				this.duration * (e.clientX / screen.width)
 		},
 	},
+	components: { Play, Pause },
 }
 </script>
 
 <style lang="stylus" scoped>
+playerHeight = 5em
+progressBarHeight = 1.5em
+
 .player
-	box-sizing: border-box
-	position: absolute
-	display: inline-block
-	bottom: 0
-	background: #000
+	display: flex
+	background: #282828
 	color: #fff
 	width: 100%
-	height: 8em
-	padding: 1em;
+	height: playerHeight
+	flex-direction: column
 
-.play-btn {
-  border: 0;
-  background: transparent;
-  box-sizing: border-box;
-  width: 0;
-  height: 2em;
+.everything-else
+	display: flex
+	padding: 1em
+	flex: 1
 
-  border-color: transparent transparent transparent #ddd;
-  transition: 100ms all ease;
-  cursor: pointer;
+.col
+	flex: 1
 
-  // play state
-  border-style: solid;
-  border-width: 3em 0 3em 5em;
+.controls
+	display: flex
+	justify-content: center
 
-  & .paused {
-    border-style: double;
-    border-width: 0px 0 0px 60px;
-  }
+.play-btn
+	display: inline
+	transition: 100ms all ease
+	cursor: pointer
+	fill: #ddd
 
-  &:hover {
-    border-color: transparent transparent transparent #fff;
-  }
-}
+	&:hover
+		fill: #fff
+
+.progress-container
+	width: 100%
+	height: progressBarHeight
+
+.progress-bar
+	height: 0.5em
+	background: lighten(#282828, 10%)
+	cursor: pointer
+	transition: 100ms all ease
+	margin: -0.5em
+
+	&:hover
+		height: progressBarHeight
+		margin-top: - progressBarHeight
+
+.played
+	height: 100%
+	width: 0%
+	background: #fff
+	transition: 100ms all ease
+
+.hover-info
+	position: absolute
+	bottom: (progressBarHeight + playerHeight) + 0.25em
 </style>

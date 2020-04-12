@@ -48,7 +48,7 @@ export default {
 .upload-box
 	width: 250px
 	height: 150px
-	border: 2px dashed #000
+	border: 2px dashed #fff
 	position: relative
 	cursor: pointer
 	display: inline-block
