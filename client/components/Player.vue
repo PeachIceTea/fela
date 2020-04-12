@@ -6,14 +6,14 @@
 		.everything-else
 			.info.col
 				.book-info {{ book.title }} by {{ book.author }}
-				.progress {{ formatTime(timestamp) }} / {{ formatTime(duration) }}
+				.progress {{ timestamp | formatDuration }} / {{ duration | formatDuration }}
 			.controls.col
 				.play-btn(@click="toogle")
 					Pause(v-show="!paused")
 					Play(v-show="paused")
 			.col
 			audio(:src="`http://localhost:8080/files/${file.hash}`" ref="audio" autoplay)
-		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ formatTime(duration * (hoverPercent / 100)) }}
+		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ duration * (hoverPercent / 100) | formatDuration }}
 </template>
 
 <script>
@@ -68,20 +68,6 @@ export default {
 		},
 		spaceHandler(e) {
 			if (e.key === " ") this.toogle()
-		},
-		formatTime(time) {
-			const hours = Math.floor(time / (60 * 60))
-			time -= hours * 60 * 60
-
-			const minutes = this.fillZero(Math.floor(time / 60))
-			time -= minutes * 60
-
-			const seconds = this.fillZero(Math.floor(time))
-			return `${hours}:${minutes}:${seconds}`
-		},
-		fillZero(time) {
-			time = time.toString()
-			return time.length < 2 ? `0${time}` : time
 		},
 		hover(e) {
 			this.hoverInfo = true

@@ -27,6 +27,9 @@ CREATE TABLE file (
 	name VARCHAR(255) NOT NULL,
 	hash CHAR(40) NOT NULL UNIQUE,
 	codec VARCHAR(50) NOT NULL,
+	duration DOUBLE NOT NULL,
+
+	metadata json NOT NULL,
 
 	audiobook BIGINT,
 	chapter INT,

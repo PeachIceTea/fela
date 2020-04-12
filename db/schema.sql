@@ -53,6 +53,8 @@ CREATE TABLE `file` (
   `name` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
   `hash` char(40) COLLATE utf8mb4_unicode_ci NOT NULL,
   `codec` varchar(50) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `duration` double NOT NULL,
+  `metadata` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL CHECK (json_valid(`metadata`)),
   `audiobook` bigint(20) DEFAULT NULL,
   `chapter` int(11) DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),

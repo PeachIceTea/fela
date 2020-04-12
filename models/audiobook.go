@@ -7,6 +7,9 @@ type Audiobook struct {
 
 	Book int64 `db:"book" json:"book"`
 
+	Codec    string  `db:"codec" json:"codec"`
+	Duration float64 `db:"duration" json:"duration"`
+
 	CreatedAt string `db:"created_at" json:"created_at"`
 }
 
