@@ -1,16 +1,20 @@
 <template lang="pug">
 	.player
 		.progress-container
-			.progress-bar(@mousemove="hover" @mouseleave="hideInfo" ref="progressBar" @click="jump")
+			.progress-bar(@mousemove="hover" @mouseleave="hideInfo" ref="progressBar" @click="progressClick")
 				.played(:style="{width: `${progress}%`}")
 		.everything-else
 			.info.col
 				.book-info {{ book.title }} by {{ book.author }}
 				.progress {{ timestamp | formatDuration }} / {{ duration | formatDuration }}
 			.controls.col
-				.play-btn(@click="toogle")
-					Pause(v-show="!paused")
-					Play(v-show="paused")
+				.control(@click="rewind")
+					Rewind.control-symbol
+				.control(@click="toogle")
+					Pause.control-symbol(v-show="!paused")
+					Play.control-symbol(v-show="paused")
+				.control(@click="forward")
+					FastForward.control-symbol
 			.col
 		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ duration * (hoverPercent / 100) | formatDuration }}
 		audio(:src="fileURL" ref="audio" autoplay)
@@ -21,6 +25,8 @@ import { mapState } from "vuex"
 
 import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
+import FastForward from "./svg/FastForward.vue"
+import Rewind from "./svg/Rewind.vue"
 
 export default {
 	data() {
@@ -76,7 +82,7 @@ export default {
 		mapState("player", ["book", "audiobook", "files"]),
 	),
 	created() {
-		document.addEventListener("keydown", this.spaceHandler)
+		document.addEventListener("keydown", this.keyHandler)
 	},
 	mounted() {
 		const audio = this.$refs.audio
@@ -95,15 +101,22 @@ export default {
 		audio.addEventListener("pause", e => (this.paused = true))
 	},
 	destroyed() {
-		document.removeEventListener("keydown", this.spaceHandler)
+		document.removeEventListener("keydown", this.keyHandler)
 	},
 	methods: {
 		toogle() {
 			const audio = this.$refs.audio
 			if (audio) audio.paused ? audio.play() : audio.pause()
 		},
-		spaceHandler(e) {
-			if (e.key === " ") this.toogle()
+		keyHandler(e) {
+			switch (e.key) {
+				case " ":
+					return this.toogle()
+				case "ArrowRight":
+					return this.forward()
+				case "ArrowLeft":
+					return this.rewind()
+			}
 		},
 		hover(e) {
 			this.hoverInfo = true
@@ -117,14 +130,15 @@ export default {
 		hideInfo() {
 			this.hoverInfo = false
 		},
-		jump(e) {
-			let d = this.duration * (e.clientX / screen.width)
-
+		progressClick(e) {
+			this.seek(this.duration * (e.clientX / screen.width))
+		},
+		seek(to) {
 			let fileIndex = 0
 			for (let i = 0, len = this.files.length, t = 0; i < len; i++) {
 				const file = this.files[i]
-				if (d < t + file.duration) {
-					d -= t
+				if (to < t + file.duration) {
+					to -= t
 					fileIndex = i
 					break
 				}
@@ -135,16 +149,23 @@ export default {
 			if (this.currentFileIndex !== fileIndex) {
 				this.currentFileIndex = fileIndex
 				const tmp = () => {
-					this.$refs.audio.currentTime = d
+					this.$refs.audio.currentTime = to
 					this.$refs.audio.removeEventListener("loadeddata", tmp)
 				}
 				this.$refs.audio.addEventListener("loadeddata", tmp)
 			} else {
-				this.$refs.audio.currentTime = d
+				this.$refs.audio.currentTime = to
 			}
 		},
+		rewind() {
+			//TODO: Allow user to customize jump
+			this.seek(this.timestamp - 30)
+		},
+		forward() {
+			this.seek(this.timestamp + 30)
+		},
 	},
-	components: { Play, Pause },
+	components: { Play, Pause, FastForward, Rewind },
 }
 </script>
 
@@ -171,8 +192,10 @@ progressBarHeight = 1.5em
 .controls
 	display: flex
 	justify-content: center
+	align-items: center
 
-.play-btn
+.control
+	margin-left: 2em
 	display: inline
 	transition: 100ms all ease
 	cursor: pointer
@@ -180,6 +203,10 @@ progressBarHeight = 1.5em
 
 	&:hover
 		fill: #fff
+
+.control-symbol
+	height: 100%
+	width: 2em
 
 .progress-container
 	width: 100%
