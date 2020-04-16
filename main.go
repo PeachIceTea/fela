@@ -7,13 +7,19 @@ import (
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
+	"github.com/PeachIceTea/fela/api"
 	"github.com/PeachIceTea/fela/conf"
-	"github.com/PeachIceTea/fela/routes"
 )
 
 func main() {
 	c := conf.Init()
-	r := gin.Default()
+	r := gin.New()
+
+	r.Use(gin.Logger())
+	r.Use(recoverMiddleware())
+	r.NoRoute(func(ctx *gin.Context) {
+		ctx.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
+	})
 
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:1234"}
@@ -25,23 +31,6 @@ func main() {
 
 	r.Use(static.Serve("/files", static.LocalFile("files", false)))
 
-	r.NoRoute(func(c *gin.Context) {
-		c.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
-	})
-
-	v1 := r.Group("/api/v1")
-	{
-		routes.GetBooks(v1, c)
-		routes.GetBook(v1, c)
-		routes.NewBook(v1, c)
-		routes.GetAuthors(v1, c)
-
-		routes.GetAudiobook(v1, c)
-		routes.NewAudiobook(v1, c)
-
-		routes.Upload(v1, c)
-		routes.AssignFiles(v1, c)
-	}
-
+	api.RegisterRoutes(r.Group("/"), c)
 	r.Run()
 }

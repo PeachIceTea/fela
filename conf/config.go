@@ -14,12 +14,15 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
+// M - Map shortcut
+type M map[string]interface{}
+
 // Config - Stores app configuration
 type Config struct {
 	DB            *sqlx.DB
 	ConnectionURL string
-	Secret        string
-	FilePath      string
+	Secret        []byte
+	FilesPath     string
 	Templates     *template.Template
 }
 
@@ -28,10 +31,27 @@ func Init() (c *Config) {
 	c = &Config{}
 
 	c.LoadEnv()
+	c.EnsureDirectoryStructure()
+
 	c.LoadTemplates()
 	c.ConnectToDatabase()
 
 	return
+}
+
+// EnsureDirectoryStructure - Ensures that the needed directory structure exists
+func (c *Config) EnsureDirectoryStructure() {
+	c.ensureDirectory("")
+	c.ensureDirectory("audio")
+	c.ensureDirectory("cover")
+}
+
+func (c *Config) ensureDirectory(p string) error {
+	err := os.Mkdir(path.Clean(fmt.Sprintf("%s/%s", c.FilesPath, p)), os.ModeDir|0755)
+	if err != nil && !os.IsExist(err) {
+		panic(err)
+	}
+	return nil
 }
 
 // ConnectToDatabase - Connects to database using the ConnectionURL
@@ -68,12 +88,14 @@ func (c *Config) LoadEnv() {
 		log.Panic("DATABASE_URL missing from .env")
 	}
 
-	if c.Secret, ok = env["SECRET"]; !ok {
+	s, ok := env["SECRET"]
+	if !ok {
 		log.Panic("SECRET missing from .env")
 	}
+	c.Secret = []byte(s)
 
-	if c.FilePath, ok = env["FILE_PATH"]; !ok {
-		log.Panic("FILE_PATH missing from .env")
+	if c.FilesPath, ok = env["FILES_PATH"]; !ok {
+		log.Panic("FILES_PATH missing from .env")
 	}
 }
 
@@ -104,9 +126,4 @@ func (c *Config) TemplateWithData(name string, data interface{}) string {
 	}
 
 	return buf.String()
-}
-
-// PathFromHash - Returns path to file for given hash
-func (c *Config) PathFromHash(h string) string {
-	return path.Clean(fmt.Sprintf("%s/%s", c.FilePath, h))
 }

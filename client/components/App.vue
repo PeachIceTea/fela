@@ -43,3 +43,15 @@ export default {
 	margin-top: auto
 	border: 1px solid #000
 </style>
+
+<style lang="stylus">
+*
+	box-sizing: border-box
+
+html, body
+	margin: 0
+	height: 100%
+	overflow: hidden
+	background: #121212
+	color: #fff
+</style>

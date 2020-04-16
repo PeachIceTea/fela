@@ -1,3 +1,3 @@
 SELECT *
-FROM book
+FROM audiobook
 WHERE id = ?
