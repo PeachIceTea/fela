@@ -23,6 +23,7 @@ func main() {
 
 	corsConfig := cors.DefaultConfig()
 	corsConfig.AllowOrigins = []string{"http://localhost:1234"}
+	corsConfig.AllowHeaders = []string{"content-type", "authorization"}
 	r.Use(cors.New(corsConfig))
 
 	r.GET("/", func(c *gin.Context) {

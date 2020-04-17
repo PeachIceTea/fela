@@ -1,58 +1,67 @@
 <template lang="pug">
 	.library
-		table
-			tr
-				th Title
-				th Author
-			tr(v-for="book in books" @click="nav(book)")
-				td {{book.title}}
-				td {{book.author}}
+		.book(
+			v-for="audiobook in audiobooks"
+			@click="play(audiobook)"
+		)
+			img(
+				:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
+				@error="noImage(audiobook)"
+			)
 </template>
 
 <script>
 export default {
-	data() {
-		return {
-			loading: false,
-		}
-	},
 	computed: {
-		books() {
-			return this.$store.state.book.books
+		audiobooks() {
+			return this.$store.state.audiobook.list
 		},
 	},
 	methods: {
-		async getBooks() {
-			this.loading = true
-			await this.$store.dispatch("book/getBooks")
-			this.loading = false
+		play(audiobook) {
+			this.$store.dispatch("getAudiobook", audiobook.id)
 		},
-		nav(book) {
-			this.$router.push(`/book/${book.id}`)
+		noImage(b) {
+			console.log(b)
+			b.noCover = true
 		},
 	},
 	created() {
-		this.getBooks()
-	},
-	watch: {
-		$route: "getBooks",
+		this.$store.dispatch("getAudiobooks")
 	},
 }
 </script>
 
 <style lang="stylus" scoped>
-.library
-	padding: 0.5em
+@import "../globals"
 
-table
-	border-spacing: 0
+.library
+	display: grid
+	grid-template-columns: repeat(4, 1fr)
+
+.book
+	cursor: pointer
+	position: relative
 	width: 100%
 
-th
-	text-align: left
+	img
+		z-index: 2
+		width: 100%
+		height: 100%
+		transition: 500ms all ease
 
-tr:not(:first-child)&:hover
-		background: #333
-		color: white
-		cursor: pointer
+		&:hover
+			filter: blur(5px) brightness(0.75)
+
+.text-container
+	z-index: 1
+	position: absolute
+	top: 0
+	left: 0
+	height: 100%
+	width: 100%
+	pointer-events: auto
+
+.img-text
+	padding: 10px
 </style>

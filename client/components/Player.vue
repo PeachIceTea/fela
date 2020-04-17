@@ -1,28 +1,44 @@
 <template lang="pug">
-	.player
-		.progress-container
-			.progress-bar(@mousemove="hover" @mouseleave="hideInfo" ref="progressBar" @click="progressClick")
-				.played(:style="{width: `${progress}%`}")
+	.player(v-show="audiobook.files")
+		.progress-bar(
+			ref="progress"
+			@click="handleProgressClick"
+			@mouseenter="showProgressInfo"
+			@mousemove="moveProgressInfo"
+			@mouseleave="hideProgressInfo"
+		)
+			.played(:style="{width: `${currentTime/totalDuration*100}%`}")
 		.everything-else
 			.info.col
-				.book-info {{ book.title }} by {{ book.author }}
-				.progress {{ timestamp | formatDuration }} / {{ duration | formatDuration }}
-			.controls.col
+				.book-info.col(style="display: inline")
+					p {{ audiobook.title }}
+					p {{ audiobook.author }}
+				.playback-info.col
+					| {{ currentTime | formatDuration }} /
+					|  {{ totalDuration | formatDuration }}
+			.playback.col
 				.control(@click="rewind")
 					Rewind.control-symbol
-				.control(@click="toogle")
+				.control(@click="toggle")
 					Pause.control-symbol(v-show="!paused")
 					Play.control-symbol(v-show="paused")
 				.control(@click="forward")
 					FastForward.control-symbol
-			.col
-		.hover-info(v-show="hoverInfo" :style="hoverStyle" ref="hoverInfo") {{ duration * (hoverPercent / 100) | formatDuration }}
-		audio(:src="fileURL" ref="audio" autoplay)
+			.knobs.col
+				.speed.col
+				.volume.col(@mousedown="handleVolumeClick" ref="volume")
+					.volume-bar
+						.filled(:style="{width: `${volume*100}%`}")
+		.progress-info(
+			ref="progressInfo"
+			v-show="progressInfo.show"
+			:style="{top: `${progressInfo.y}px`,left: `${progressInfo.x}px`}"
+		)
+			| {{ progressInfo.value | formatDuration }}
+		audio(:src="fileUrl" ref="audio")
 </template>
 
 <script>
-import { mapState } from "vuex"
-
 import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
 import FastForward from "./svg/FastForward.vue"
@@ -31,205 +47,224 @@ import Rewind from "./svg/Rewind.vue"
 export default {
 	data() {
 		return {
-			currentTime: 0,
-			currentFileIndex: 0,
-			fileDuration: 0,
 			paused: true,
-			hoverInfo: false,
-			hoverPercent: 0,
-			hoverStyle: {
-				left: "0px",
+			currentTime: 0,
+			volume: 1,
+			progressInfo: {
+				show: false,
+				value: 0,
+				x: 0,
 			},
 		}
 	},
-	computed: Object.assign(
-		{
-			progress() {
-				return (this.timestamp / this.duration) * 100
-			},
-			duration() {
-				if (this.files.length > 1) {
-					return this.audiobook.duration
-				} else {
-					return this.fileDuration
-				}
-			},
-			timestamp() {
-				const len = this.files.length
-				if (len > 1) {
-					let time = this.currentTime
-					for (let i = 0; i < this.currentFileIndex; i++) {
-						time += this.files[i].duration
-					}
-					return time
-				} else {
-					return this.currentTime
-				}
-			},
-			file() {
-				if (this.files[0]) {
-					return this.files[this.currentFileIndex]
-				} else {
-					return {}
-				}
-			},
-			fileURL() {
-				return this.file.hash
-					? `http://localhost:8080/files/${this.file.hash}`
-					: ""
-			},
+	computed: {
+		audiobook() {
+			return this.$store.state.audiobook.playing
 		},
-		mapState("player", ["book", "audiobook", "files"]),
-	),
-	created() {
-		document.addEventListener("keydown", this.keyHandler)
-	},
-	mounted() {
-		const audio = this.$refs.audio
-		audio.addEventListener("timeupdate", e => {
-			this.currentTime = audio.currentTime
-		})
-		audio.addEventListener("durationchange", e => {
-			this.fileDuration = audio.duration
-		})
-		audio.addEventListener("ended", e => {
-			if (this.files.length > 1) {
-				this.currentFileIndex++
+		totalDuration() {
+			if (this.audiobook.files) {
+				return this.audiobook.files.reduce(
+					(sum, a) => sum + a.duration,
+					0,
+				)
+			} else {
+				return 0
 			}
-		})
-		audio.addEventListener("play", e => (this.paused = false))
-		audio.addEventListener("pause", e => (this.paused = true))
-	},
-	destroyed() {
-		document.removeEventListener("keydown", this.keyHandler)
+		},
+		fileUrl() {
+			const audiobook = this.audiobook
+			if (audiobook.files) {
+				return `http://localhost:8080/files/audio/${audiobook.id}/${audiobook.files[0].name}`
+			}
+		},
 	},
 	methods: {
-		toogle() {
-			const audio = this.$refs.audio
-			if (audio) audio.paused ? audio.play() : audio.pause()
+		rewind() {
+			this.seek(this.currentTime - 30)
+		},
+		toggle() {
+			const el = this.$refs.audio
+			if (el) {
+				el.paused ? el.play() : el.pause()
+			}
+		},
+		forward() {
+			this.seek(this.currentTime + 30)
+		},
+		increaseVolume() {
+			this.setVolume(this.volume + 0.1)
+		},
+		decreaseVolume() {
+			this.setVolume(this.volume - 0.1)
 		},
 		keyHandler(e) {
 			switch (e.key) {
 				case " ":
-					return this.toogle()
-				case "ArrowRight":
-					return this.forward()
+					e.preventDefault()
+					return this.toggle()
 				case "ArrowLeft":
+					e.preventDefault()
 					return this.rewind()
+				case "ArrowRight":
+					e.preventDefault()
+					return this.forward()
+				case "ArrowUp":
+					e.preventDefault()
+					return this.increaseVolume()
+				case "ArrowDown":
+					e.preventDefault()
+					return this.decreaseVolume()
 			}
 		},
-		hover(e) {
-			this.hoverInfo = true
-			this.hoverPercent = (e.clientX / screen.width) * 100
-
-			const width = this.$refs.hoverInfo.offsetWidth
-			const max = screen.width - width
-			const left = Math.min(Math.max(e.clientX - width / 2, 0), max)
-			this.hoverStyle.left = `${left}px`
+		setVolume(vol) {
+			this.$refs.audio.volume = vol
+			this.volume = vol
 		},
-		hideInfo() {
-			this.hoverInfo = false
-		},
-		progressClick(e) {
-			this.seek(this.duration * (e.clientX / screen.width))
-		},
-		seek(to) {
-			let fileIndex = 0
-			for (let i = 0, len = this.files.length, t = 0; i < len; i++) {
-				const file = this.files[i]
-				if (to < t + file.duration) {
-					to -= t
-					fileIndex = i
-					break
-				}
-
-				t += file.duration
+		handleVolumeClick(e) {
+			const volume = this.$refs.volume
+			const bounds = volume.getBoundingClientRect()
+			const setVolume = e => {
+				this.setVolume(
+					Math.min(
+						1,
+						Math.max(0, (e.clientX - bounds.x) / bounds.width),
+					),
+				)
 			}
-
-			if (this.currentFileIndex !== fileIndex) {
-				this.currentFileIndex = fileIndex
-				const tmp = () => {
-					this.$refs.audio.currentTime = to
-					this.$refs.audio.removeEventListener("loadeddata", tmp)
-				}
-				this.$refs.audio.addEventListener("loadeddata", tmp)
-			} else {
-				this.$refs.audio.currentTime = to
+			const removeListener = () => {
+				document.removeEventListener("mousemove", setVolume)
+				document.removeEventListener("mouseup", removeListener)
 			}
+			setVolume(e)
+			document.addEventListener("mousemove", setVolume)
+			document.addEventListener("mouseup", removeListener)
 		},
-		rewind() {
-			//TODO: Allow user to customize jump
-			this.seek(this.timestamp - 30)
+		seek(time) {
+			this.$refs.audio.currentTime = time
 		},
-		forward() {
-			this.seek(this.timestamp + 30)
+		handleProgressClick(e) {
+			const bounds = this.$refs.progress.getBoundingClientRect()
+			this.seek(
+				(this.totalDuration * (e.clientX - bounds.x)) / bounds.width,
+			)
 		},
+		showProgressInfo() {
+			this.progressInfo.show = true
+		},
+		hideProgressInfo() {
+			this.progressInfo.show = false
+		},
+		moveProgressInfo(e) {
+			this.progressInfo.value =
+				(this.totalDuration * e.clientX) / screen.width
+			this.progressInfo.x =
+				e.clientX -
+				this.$refs.progressInfo.getBoundingClientRect().width / 2
+		},
+	},
+	created() {
+		document.addEventListener("keydown", this.keyHandler)
+	},
+	mounted() {
+		const el = this.$refs.audio
+		el.addEventListener("timeupdate", e => {
+			this.currentTime = el.currentTime
+		})
+		el.addEventListener("play", e => (this.paused = false))
+		el.addEventListener("pause", e => (this.paused = true))
+	},
+	destroyed() {
+		document.removeEventListener("keydown", this.keyHandler)
 	},
 	components: { Play, Pause, FastForward, Rewind },
 }
 </script>
 
 <style lang="stylus" scoped>
-playerHeight = 5em
-progressBarHeight = 1.5em
+@import "../globals"
+player-height = 5.5em
+progress-bar-height = 1.5em
 
 .player
 	display: flex
-	background: #282828
-	color: #fff
 	width: 100%
-	height: playerHeight
+	height: player-height
 	flex-direction: column
 
 .everything-else
 	display: flex
 	padding: 1em
 	flex: 1
+	height: 100%
+
+.playback
+	justify-content: center
 
 .col
+	display: flex
+	align-items: center
 	flex: 1
 
-.controls
-	display: flex
-	justify-content: center
-	align-items: center
+.info
+	p
+		margin: 5px 0 0 5px
 
 .control
 	margin-left: 2em
 	display: inline
 	transition: 100ms all ease
 	cursor: pointer
-	fill: #ddd
+	fill: black-text
 
 	&:hover
-		fill: #fff
+		fill: white-text
+
 
 .control-symbol
 	height: 100%
 	width: 2em
+	cursor: pointer
 
-.progress-container
+.knobs
+	justify-content: right
+
+.volume-bar
 	width: 100%
-	height: progressBarHeight
+	height: progress-bar-height - 0.5em
+	border-radius: 5px
+	background: black-text
+	cursor: pointer
+
+	.filled
+		border-radius: 5px
+		height: 100%
+		width: 50%
+		background: offwhite
+		transition: 100ms all ease
+		cursor: inherit
 
 .progress-bar
+	z-index: 2
 	height: 0.5em
-	background: lighten(#282828, 10%)
+	background: black-text
 	cursor: pointer
 	transition: 100ms all ease
 	margin: -0.5em
 
 	&:hover
-		height: progressBarHeight
-		margin-top: - progressBarHeight
+		height: progress-bar-height
+		margin-top: - progress-bar-height
 
-.played
-	height: 100%
-	width: 0%
-	background: #fff
-	transition: 250ms all ease
+	.played
+		height: 100%
+		width: 50%
+		background: offwhite
+		transition: 250ms all ease
+		cursor: inherit
 
-.hover-info
+.progress-info
 	position: absolute
-	bottom: (progressBarHeight + playerHeight) + 0.25em
+	background: background
+	padding: 0.5em
+	bottom: player-height + progress-bar-height + 0.25em
 </style>

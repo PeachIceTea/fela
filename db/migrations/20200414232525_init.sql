@@ -43,11 +43,8 @@ CREATE TABLE file (
 	FOREIGN KEY (audiobook) REFERENCES audiobook(id)
 );
 
-CREATE VIEW audiobook_with_duration AS
-SELECT a.*, SUM(f.duration) duration
-FROM audiobook a
-JOIN file f ON a.id = f.audiobook;
-
+INSERT INTO user (name, password, role)
+VALUES ('admin', '$2y$10$ddqHCunFxTAZxznsuk.O7.RrOc3Hx1s.LIbCo8d4.XapAOUIVRU3O', 'admin')
 
 -- migrate:down
 DROP VIEW audiobook_with_duration;

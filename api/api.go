@@ -23,16 +23,17 @@ var (
 func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 	v1 := r.Group("/api/v1")
 	{
-		Register(v1, c) //TODO: Protect route / Proper setup story
 		Login(v1, c)
 	}
 
 	protected := v1.Group("/")
 	protected.Use(authRequired(c))
 	{
+
 		GetUsers(protected, c)
 		GetUser(protected, c)
 		UpdateUser(protected, c)
+		Register(v1, c) //TODO: Proper setup story
 		DeleteUser(protected, c)
 
 		GetAudiobooks(protected, c)
@@ -41,6 +42,10 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 		Upload(protected, c)
 		UpdateAudiobook(protected, c)
 		DeleteAudiobook(protected, c)
+
+		protected.GET("/token-test", func(ctx *gin.Context) {
+			ctx.JSON(http.StatusOK, conf.M{"msg": "token is valid"})
+		})
 	}
 }
 

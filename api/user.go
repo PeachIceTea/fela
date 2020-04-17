@@ -18,7 +18,7 @@ type User struct {
 	ID        int64   `db:"id" json:"id"`
 	Name      string  `db:"name" json:"name"`
 	Password  []byte  `db:"password" json:"-"`
-	Role      string  `db:"role" json:"-"`
+	Role      string  `db:"role" json:"role"`
 	CreatedAt string  `db:"created_at" json:"created_at"`
 	UpdatedAt *string `db:"updated_at" json:"updated_at"`
 
@@ -102,6 +102,8 @@ func Register(r *gin.RouterGroup, c *conf.Config) {
 			data.Role = "user"
 		}
 
+		data.Name = strings.ToLower(data.Name)
+
 		res, err := c.DB.Exec(
 			c.TemplateString("register"), data.Name, hash, data.Role,
 		)
@@ -146,6 +148,8 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
+		data.Name = strings.ToLower(data.Name)
+
 		u := User{}
 		err = c.DB.Get(&u, c.TemplateString("login"), data.Name)
 		if err != nil {
@@ -175,7 +179,7 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 			u.Name,
 			u.Role,
 			jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(time.Hour * 24 * 7).Unix(),
+				ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			},
 		}).SignedString(c.Secret)
 		if err != nil {
@@ -237,6 +241,9 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
+		//TODO: Add more checks when changing password:
+		// 1: If user is not an admin require reauthentication
+		// 2: If the password of an admin is changed, required reauthentication
 		if data.Password != nil {
 			hash, err := bcrypt.GenerateFromPassword([]byte(*data.Password), bcrypt.DefaultCost)
 			if err != nil {
@@ -244,6 +251,11 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 			}
 			str := string(hash)
 			data.Password = &str
+		}
+
+		if data.Name != nil {
+			lower := strings.ToLower(*data.Name)
+			data.Name = &lower
 		}
 
 		data.ID = id

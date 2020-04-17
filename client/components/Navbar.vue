@@ -4,35 +4,54 @@
 		router-link.nav-el(to="/upload") Upload
 		.nav-el.nav-break
 		router-link.nav-el(to="/settings") Settings
-		router-link.nav-el(to="/404") Logout
+		span.nav-el(@click="logout") Logout
 </template>
 
+<script>
+export default {
+	methods: {
+		logout() {
+			this.$store.dispatch("logout")
+			this.$router.push("/login")
+		},
+	},
+}
+</script>
+
 <style lang="stylus" scoped>
+@import "../globals.styl"
+
 .navbar
 	height: 100%
 	display: flex
 	flex-direction: column
-	background: #040404
+	background: highlight
 	padding: 1.25em
+	text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5)
 
 .nav-el
 	display: flex
 	justify-content: center
 	align-items: center
-	height: 3em
+	height: 75px
 	cursor: pointer
 	border-radius: 0.25em
 	text-decoration: none
 	outline: 0
-	color: #fff
+	color: white-text
+	font-size: 20px
+	transition: 250ms all ease
+	margin-top: 10px
 
 	&:visited
-		color: #fff
+		color: white-text
 
 	&:hover
-		background: #333
+		background: darken(highlight, 10%)
 
 .nav-break
 	background: transparent !important
+	box-shadow: none !important
+	border: 0
 	cursor: default
 </style>

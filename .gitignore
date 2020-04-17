@@ -56,3 +56,6 @@ files/*
 
 # Go debug executable
 __debug_bin
+
+# Macos files
+.DS_Store

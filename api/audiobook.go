@@ -90,37 +90,6 @@ func GetAudiobookFiles(r *gin.RouterGroup, c *conf.Config) {
 	})
 }
 
-// DeleteAudiobook - DELETE /audiobook/:id - Deletes audiobook and files
-func DeleteAudiobook(r *gin.RouterGroup, c *conf.Config) {
-	r.DELETE("/audiobook/:id", func(ctx *gin.Context) {
-		id, err := getID(ctx)
-		if err != nil {
-			ctx.JSON(http.StatusBadRequest, conf.M{"err": err.Error()})
-			return
-		}
-
-		claims := getClaims(ctx)
-		if !claims.isUploader() {
-			ctx.JSON(
-				http.StatusUnauthorized,
-				conf.M{"err": "no permission to delete"},
-			)
-			return
-		}
-
-		_, err = c.DB.Exec(c.TemplateString("delete_audiobook"), id)
-		if err != nil {
-			panic(err)
-		}
-
-		// Remove audio files and cover
-		os.RemoveAll(path.Clean(fmt.Sprintf("%s/audio/%d", c.FilesPath, id)))
-		os.Remove(path.Clean(fmt.Sprintf("%s/cover/%d.jpg", c.FilesPath, id)))
-
-		ctx.JSON(http.StatusOK, conf.M{"msg": "audiobook deleted"})
-	})
-}
-
 // UpdateAudiobook - PUT /audiobook/:id
 func UpdateAudiobook(r *gin.RouterGroup, c *conf.Config) {
 	r.PUT("/audiobook/:id", func(ctx *gin.Context) {
@@ -208,5 +177,40 @@ func UpdateAudiobook(r *gin.RouterGroup, c *conf.Config) {
 		}
 
 		ctx.JSON(http.StatusOK, conf.M{"msg": "audiobook updated"})
+	})
+}
+
+// DeleteAudiobook - DELETE /audiobook/:id - Deletes audiobook and files
+func DeleteAudiobook(r *gin.RouterGroup, c *conf.Config) {
+	r.DELETE("/audiobook/:id", func(ctx *gin.Context) {
+		id, err := getID(ctx)
+		if err != nil {
+			ctx.JSON(http.StatusBadRequest, conf.M{"err": err.Error()})
+			return
+		}
+
+		claims := getClaims(ctx)
+		if !claims.isUploader() {
+			ctx.JSON(
+				http.StatusUnauthorized,
+				conf.M{"err": "no permission to delete"},
+			)
+			return
+		}
+
+		_, err = c.DB.Exec(c.TemplateString("delete_audiobook_files"), id)
+		if err != nil {
+			panic(err)
+		}
+		_, err = c.DB.Exec(c.TemplateString("delete_audiobook"), id)
+		if err != nil {
+			panic(err)
+		}
+
+		// Remove audio files and cover
+		os.RemoveAll(path.Clean(fmt.Sprintf("%s/audio/%d", c.FilesPath, id)))
+		os.Remove(path.Clean(fmt.Sprintf("%s/cover/%d.jpg", c.FilesPath, id)))
+
+		ctx.JSON(http.StatusOK, conf.M{"msg": "audiobook deleted"})
 	})
 }
