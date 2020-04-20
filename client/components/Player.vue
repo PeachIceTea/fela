@@ -98,22 +98,24 @@ export default {
 			this.setVolume(this.volume - 0.1)
 		},
 		keyHandler(e) {
-			switch (e.key) {
-				case " ":
-					e.preventDefault()
-					return this.toggle()
-				case "ArrowLeft":
-					e.preventDefault()
-					return this.rewind()
-				case "ArrowRight":
-					e.preventDefault()
-					return this.forward()
-				case "ArrowUp":
-					e.preventDefault()
-					return this.increaseVolume()
-				case "ArrowDown":
-					e.preventDefault()
-					return this.decreaseVolume()
+			if (e.srcElement.tagName !== "INPUT") {
+				switch (e.key) {
+					case " ":
+						e.preventDefault()
+						return this.toggle()
+					case "ArrowLeft":
+						e.preventDefault()
+						return this.rewind()
+					case "ArrowRight":
+						e.preventDefault()
+						return this.forward()
+					case "ArrowUp":
+						e.preventDefault()
+						return this.increaseVolume()
+					case "ArrowDown":
+						e.preventDefault()
+						return this.decreaseVolume()
+				}
 			}
 		},
 		setVolume(vol) {
@@ -190,6 +192,8 @@ progress-bar-height = 1.5em
 	width: 100%
 	height: player-height
 	flex-direction: column
+	background: player-background
+	text-shadow: text-shadow
 
 .everything-else
 	display: flex
@@ -232,8 +236,9 @@ progress-bar-height = 1.5em
 	width: 100%
 	height: progress-bar-height - 0.5em
 	border-radius: 5px
-	background: black-text
+	background: darken(black-text, 40%)
 	cursor: pointer
+	box-shadow: box-shadow
 
 	.filled
 		border-radius: 5px
@@ -242,14 +247,16 @@ progress-bar-height = 1.5em
 		background: offwhite
 		transition: 100ms all ease
 		cursor: inherit
+		box-shadow: inherit
 
 .progress-bar
 	z-index: 2
 	height: 0.5em
-	background: black-text
+	background: darken(black-text, 30%)
 	cursor: pointer
 	transition: 100ms all ease
 	margin: -0.5em
+	box-shadow: 0px -5px 15px 0px rgba(0,0,0,0.25)
 
 	&:hover
 		height: progress-bar-height

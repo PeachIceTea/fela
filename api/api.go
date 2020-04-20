@@ -51,6 +51,7 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 
 // The authRequired requires request to carry a valid JWT in the Authorization
 // header using the Bearer schema.
+//TODO: improve
 func authRequired(c *conf.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authStr := ctx.GetHeader("Authorization")

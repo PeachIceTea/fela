@@ -13,7 +13,7 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Audiobook represents a Audiobook database row
+// Audiobook represents a Audiobook database row.
 type Audiobook struct {
 	ID        int64   `db:"id" json:"id"`
 	Title     *string `db:"title" json:"title"`
@@ -25,19 +25,19 @@ type Audiobook struct {
 	Files []File `db:"-" json:"files,omitempty"`
 }
 
-// GetAudiobooks - GET /audiobook - Get all audiobooks
+// GetAudiobooks - GET /audiobook - Get all audiobooks.
 func GetAudiobooks(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/audiobook", func(ctx *gin.Context) {
-		a := []Audiobook{}
-		err := c.DB.Select(&a, c.TemplateString("all_audiobooks"))
+		audiobooks := []Audiobook{}
+		err := c.DB.Select(&audiobooks, c.TemplateString("all_audiobooks"))
 		if err != nil {
 			panic(err)
 		}
-		ctx.JSON(http.StatusOK, conf.M{"audiobooks": a})
+		ctx.JSON(http.StatusOK, conf.M{"audiobooks": audiobooks})
 	})
 }
 
-// GetAudiobook - GET /audiobook/:id - Get single audiobook including its files
+// GetAudiobook - GET /audiobook/:id - Get single audiobook including its files.
 func GetAudiobook(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/audiobook/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)
@@ -46,8 +46,8 @@ func GetAudiobook(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
-		a := Audiobook{}
-		err = c.DB.Get(&a, c.TemplateString("get_audiobook"), id)
+		audiobook := Audiobook{}
+		err = c.DB.Get(&audiobook, c.TemplateString("get_audiobook"), id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				ctx.JSON(
@@ -61,17 +61,17 @@ func GetAudiobook(r *gin.RouterGroup, c *conf.Config) {
 		}
 
 		err = c.DB.Select(
-			&a.Files, c.TemplateString("get_audiobook_files"),
-			a.ID)
+			&audiobook.Files, c.TemplateString("get_audiobook_files"),
+			audiobook.ID)
 		if err != nil {
 			panic(err)
 		}
 
-		ctx.JSON(http.StatusOK, conf.M{"audiobook": a})
+		ctx.JSON(http.StatusOK, conf.M{"audiobook": audiobook})
 	})
 }
 
-// GetAudiobookFiles - GET /audiobook/:id/files - Get files for audiobook
+// GetAudiobookFiles - GET /audiobook/:id/files - Get files for audiobook.
 func GetAudiobookFiles(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/audiobook/:id/files", func(ctx *gin.Context) {
 		id, err := getID(ctx)
@@ -80,17 +80,18 @@ func GetAudiobookFiles(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
-		f := []File{}
-		err = c.DB.Select(&f, c.TemplateString("get_audiobook_files"), id)
+		files := []File{}
+		err = c.DB.Select(&files, c.TemplateString("get_audiobook_files"), id)
 		if err != nil {
 			panic(err)
 		}
 
-		ctx.JSON(http.StatusOK, conf.M{"files": f})
+		ctx.JSON(http.StatusOK, conf.M{"files": files})
 	})
 }
 
-// UpdateAudiobook - PUT /audiobook/:id
+// UpdateAudiobook - PUT /audiobook/:id - Updates audiobook.
+// Accepts the fields "title" and "author" and "cover" as file upload.
 func UpdateAudiobook(r *gin.RouterGroup, c *conf.Config) {
 	r.PUT("/audiobook/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)
@@ -180,7 +181,7 @@ func UpdateAudiobook(r *gin.RouterGroup, c *conf.Config) {
 	})
 }
 
-// DeleteAudiobook - DELETE /audiobook/:id - Deletes audiobook and files
+// DeleteAudiobook - DELETE /audiobook/:id - Deletes audiobook and files.
 func DeleteAudiobook(r *gin.RouterGroup, c *conf.Config) {
 	r.DELETE("/audiobook/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)

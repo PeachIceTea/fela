@@ -19,12 +19,12 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// Declare errors
+// Declare errors.
 var (
 	ErrNoAudioStream = errors.New("no audio stream")
 )
 
-// File represents a File database row
+// File represents a File database row.
 type File struct {
 	ID          int64     `db:"id" json:"id"`
 	Name        string    `db:"name" json:"name"`
@@ -37,7 +37,8 @@ type File struct {
 	UpdatedAt   *string   `db:"updated_at" json:"updated_at"`
 }
 
-// Upload - POST /user/register - Creates new user
+// Upload - POST /user/register - Creates a new audiobook.
+// Requires the "file" field which has to include 1 or more files.
 func Upload(r *gin.RouterGroup, c *conf.Config) {
 	r.POST("/audiobook/upload", func(ctx *gin.Context) {
 		claims := getClaims(ctx)
@@ -89,21 +90,21 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 		err = os.Mkdir(dirPath, os.ModePerm|os.ModeDir)
 		if err != nil {
 			tx.Rollback()
-			panic(err) // file permission issues?
+			panic(err)
 		}
 
 		var eg errgroup.Group
 		files := make([]*File, len(data.Files))
-		for i, h := range data.Files {
-			eg.Go(func(i int, h *multipart.FileHeader) func() error {
+		for i, header := range data.Files {
+			eg.Go(func(i int, header *multipart.FileHeader) func() error {
 				return func() (err error) {
 					file := &File{
-						Name:        h.Filename,
-						Path:        fmt.Sprintf("%s/%s", dirPath, h.Filename),
+						Name:        header.Filename,
+						Path:        fmt.Sprintf("%s/%s", dirPath, header.Filename),
 						AudiobookID: &audiobookID,
 					}
 
-					err = storeFile(file.Path, h, c)
+					err = storeFile(file.Path, header, c)
 					if err != nil {
 						return
 					}
@@ -128,22 +129,21 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 						return
 					}
 
-					// Extract cover from first file
+					// Extract cover from first file and uses a
+					// placeholder-cover if that fails.
 					if i == 0 {
-						extractCover(
-							file.Path,
-							path.Clean(fmt.Sprintf(
-								"%s/cover/%d.jpg",
-								c.FilesPath,
-								audiobookID,
-							)),
-						)
+						coverPath := path.Clean(fmt.Sprintf(
+							"%s/cover/%d.jpg",
+							c.FilesPath,
+							audiobookID,
+						))
+						extractCover(file.Path, coverPath)
 					}
 
 					files[i] = file
 					return
 				}
-			}(i, h))
+			}(i, header))
 		}
 		err = eg.Wait()
 		if err != nil {
@@ -159,7 +159,13 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 	})
 }
 
-func storeFile(path string, h *multipart.FileHeader, c *conf.Config) (err error) {
+// storeFile writes a single multipart.File to disk. Returns an error if the
+// file already exists.
+func storeFile(
+	path string,
+	h *multipart.FileHeader,
+	c *conf.Config,
+) (err error) {
 	f, err := h.Open()
 	if err != nil {
 		return
@@ -179,7 +185,12 @@ func storeFile(path string, h *multipart.FileHeader, c *conf.Config) (err error)
 	return
 }
 
-func extractMetadata(path string) (fm *Metadata, err error) {
+// extractMetadata uses ffprobe to get information about the streams it
+// includes as well as any other metadata included in the file, like author,
+// title or chapter markers.
+// This information can later be used to display the length of a given
+// audiobook, provide chapter markers with the player etc.
+func extractMetadata(path string) (meta *Metadata, err error) {
 	cmd := exec.Command(
 		"ffprobe",
 		"-i", path,
@@ -196,8 +207,8 @@ func extractMetadata(path string) (fm *Metadata, err error) {
 		return
 	}
 
-	fm = &Metadata{}
-	if err = json.NewDecoder(stdout).Decode(&fm); err != nil {
+	meta = &Metadata{}
+	if err = json.NewDecoder(stdout).Decode(&meta); err != nil {
 		return
 	}
 
@@ -205,6 +216,8 @@ func extractMetadata(path string) (fm *Metadata, err error) {
 	return
 }
 
+// extractCover uses ffmpeg to extract the cover included in many audiobook
+// files and saves it as a jpg.
 func extractCover(filePath, coverPath string) (err error) {
 	cmd := exec.Command(
 		"ffmpeg",
@@ -221,6 +234,25 @@ func extractCover(filePath, coverPath string) (err error) {
 	}
 
 	err = cmd.Wait()
+	return
+}
+
+// usePlaceholderCover copies a placeholder cover to the path. Used when the
+// audiobook does not come with one by default.
+func usePlaceholderCover(coverPath string) (err error) {
+	f, err := os.Create(coverPath)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	placeholder, err := os.Open("placeholder-cover.jpg")
+	if err != nil {
+		return err
+	}
+	defer placeholder.Close()
+
+	_, err = io.Copy(f, placeholder)
 	return
 }
 
@@ -275,7 +307,7 @@ type Metadata struct {
 	} `json:"format"`
 }
 
-// Scan turns string into AudiobookInfo struct - used by database/sql
+// Scan turns a string or []byte into a Metadata struct.
 func (fm *Metadata) Scan(src interface{}) error {
 	if src == nil {
 		return nil
@@ -303,13 +335,13 @@ func (fm *Metadata) Scan(src interface{}) error {
 	return json.Unmarshal(source, fm)
 }
 
-// Value turns struct into string - used by database/sql
+// Value turns struct into string.
 func (fm Metadata) Value() (v driver.Value, err error) {
 	v, err = json.Marshal(fm)
 	return
 }
 
-// Codec extracts the codec of the audiostream
+// Codec extracts the codec of the audiostream.
 func (fm *Metadata) Codec() (c string, err error) {
 	for _, stream := range fm.Streams {
 		if stream.CodecType == "audio" {
@@ -321,11 +353,11 @@ func (fm *Metadata) Codec() (c string, err error) {
 	return
 }
 
-// Duration returns the duration of the audiostream
-func (fm *Metadata) Duration() (d float64, err error) {
+// Duration returns the length of the audiostream.
+func (fm *Metadata) Duration() (duration float64, err error) {
 	for _, stream := range fm.Streams {
 		if stream.CodecType == "audio" {
-			d, err = strconv.ParseFloat(stream.Duration, 64)
+			duration, err = strconv.ParseFloat(stream.Duration, 64)
 			return
 		}
 	}

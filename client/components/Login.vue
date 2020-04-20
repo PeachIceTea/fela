@@ -1,6 +1,5 @@
 <template lang="pug">
 	.login
-		.msg(v-show="err") {{ err }}
 		form(@submit.prevent="submit")
 			input(type="text" placeholder="Username" v-model="name" required)
 			input(
@@ -10,6 +9,7 @@
 				required
 			)
 			input(type="submit" value="Login" ref="btn")
+		.err(v-show="err") Error: {{ err }}
 </template>
 
 <script>
@@ -34,7 +34,11 @@ export default {
 				password: this.password,
 			})
 			if (!res.err) {
-				this.$router.push("/")
+				try {
+					await this.$router.push("/")
+				} catch (e) {
+					await this.$router.push("/")
+				}
 			} else {
 				this.err = res.err
 			}
@@ -42,6 +46,7 @@ export default {
 			this.animate = false
 		},
 		animation() {
+			const btn = this.$refs.btn
 			if (this.animate) {
 				let text = "Logging in ."
 				if (this.frame === 1) {
@@ -50,12 +55,14 @@ export default {
 					text += ".."
 				}
 
-				this.$refs.btn.value = text
+				btn.value = text
 				this.frame++
 				this.frame %= 3
 				setTimeout(this.animation, 500)
 			} else {
-				this.$refs.btn.value = "Login"
+				if (btn) {
+					btn.value = "Login"
+				}
 			}
 		},
 	},
@@ -64,10 +71,10 @@ export default {
 
 <style lang="stylus" scoped>
 @import "../globals.styl"
-borderRadius = 3px
+
+border-radius = 3px
 form-width = 249px
 font-size = 20px
-padding = 11px 10px 9px
 
 .login
 	display: flex
@@ -82,7 +89,7 @@ form
 	flex-direction: column
 	align-items: center
 	margin-top: 10vh
-	box-shadow: 1px 1px 5px 0px rgba(0,0,0,0.25)
+	box-shadow: box-shadow
 	width: form-width
 
 input
@@ -90,7 +97,7 @@ input
 	width: 100%
 	border: 0
 	color: black-text
-	padding: padding
+	padding: input-padding
 	outline: 0
 	background: offwhite
 	font-size: font-size
@@ -104,9 +111,22 @@ input[type="submit"]
 	&::-moz-focus-inner
 		border: 0
 
+	&:active
+		background: darken(highlight, 10%)
+
 input:first-child
-	border-radius: borderRadius borderRadius 0 0
+	border-radius: border-radius border-radius 0 0
 
 input:last-child
-	border-radius: 0 0 borderRadius borderRadius
+	border-radius: 0 0 border-radius border-radius
+
+.err
+	margin-top: 1em
+	width: form-width
+	font-size: font-size
+	background: offwhite
+	color: black-text
+	border-radius: border-radius
+	border-top: 5px red solid
+	padding: 0.1em
 </style>

@@ -6,11 +6,13 @@
 		)
 			img(
 				:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
-				@error="noImage(audiobook)"
+				@error="noImage"
 			)
 </template>
 
 <script>
+import PlacholderCover from "../placeholder-cover.jpg"
+
 export default {
 	computed: {
 		audiobooks() {
@@ -19,11 +21,10 @@ export default {
 	},
 	methods: {
 		play(audiobook) {
-			this.$store.dispatch("getAudiobook", audiobook.id)
+			this.$store.dispatch("playAudiobook", audiobook.id)
 		},
-		noImage(b) {
-			console.log(b)
-			b.noCover = true
+		noImage(e) {
+			e.srcElement.src = PlacholderCover
 		},
 	},
 	created() {

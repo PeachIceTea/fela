@@ -47,10 +47,11 @@ export async function deleteAudiobook(id) {
 }
 
 // Complex
-export function upload(files, progressCallback) {
+// Handles upload
+export function upload(files, progressCallback = () => {}) {
 	return new Promise(resolve => {
 		const form = new FormData()
-		// An file input element has only a single FileList which is reused
+		// A file input element has only a single FileList which is reused
 		// when needed. To keep references to the files we need to create a
 		// new array.
 		const arr = []
@@ -87,6 +88,7 @@ export function upload(files, progressCallback) {
 		}
 		try {
 			xhr.open("POST", url("/audiobook/upload"))
+			xhr.setRequestHeader("Authorization", getAuthHeader())
 			xhr.send(form)
 		} catch (e) {
 			console.error(e)
@@ -98,42 +100,45 @@ export function upload(files, progressCallback) {
 export function updateAudiobook(
 	id,
 	{ title, author, cover },
-	progressCallback,
+	progressCallback = () => {},
 ) {
-	const form = new FormData()
-	if (title) {
-		form.set("title", title)
-	}
-	if (author) {
-		form.set("author", author)
-	}
-	if (cover) {
-		form.set("cover", cover)
-	}
-
-	const xhr = new XMLHttpRequest()
-	xhr.responseType = "json"
-	xhr.upload.onprogress = e => {
-		progressCallback(Math.floor(e.loaded / e.total))
-	}
-	xhr.onerror = e => {
-		console.error(e)
-		resolve({ err: "could not connect to server" })
-	}
-	xhr.onload = e => {
-		if (xhr.status !== 200) {
-			resolve({ err: xhr.response.err })
-		} else {
-			resolve({})
+	return new Promise(resolve => {
+		const form = new FormData()
+		if (title) {
+			form.set("title", title)
 		}
-	}
-	try {
-		xhr.open("PUT", url(`/audiobook/${id}`))
-		xhr.send(form)
-	} catch (e) {
-		console.error(e)
-		resolve({ err: "could not connect to server" })
-	}
+		if (author) {
+			form.set("author", author)
+		}
+		if (cover) {
+			form.set("cover", cover)
+		}
+
+		const xhr = new XMLHttpRequest()
+		xhr.responseType = "json"
+		xhr.upload.onprogress = e => {
+			progressCallback(Math.floor(e.loaded / e.total))
+		}
+		xhr.onerror = e => {
+			console.error(e)
+			resolve({ err: "could not connect to server" })
+		}
+		xhr.onload = e => {
+			if (xhr.status !== 200) {
+				resolve({ err: xhr.response.err })
+			} else {
+				resolve({})
+			}
+		}
+		try {
+			xhr.open("PUT", url(`/audiobook/${id}`))
+			xhr.setRequestHeader("Authorization", getAuthHeader())
+			xhr.send(form)
+		} catch (e) {
+			console.error(e)
+			resolve({ err: "could not connect to server" })
+		}
+	})
 }
 
 // Helper
@@ -172,12 +177,14 @@ export function fetchConfig({ method, body, contentType }) {
 		method,
 		body,
 		headers: {
-			Authorization: `Bearer ${store.state.auth.token}`,
+			Authorization: getAuthHeader(),
 			"Content-Type": contentType,
 		},
 	}
 	return config
 }
+
+export const getAuthHeader = () => `Bearer ${store.state.auth.token}`
 
 export async function api(route, config) {
 	try {

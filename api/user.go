@@ -13,7 +13,7 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// User represents a single user in the database
+// User represents a single user in the database.
 type User struct {
 	ID        int64   `db:"id" json:"id"`
 	Name      string  `db:"name" json:"name"`
@@ -25,19 +25,19 @@ type User struct {
 	Uploads []Audiobook `db:"-" json:"uploads,omitempty"`
 }
 
-// GetUsers - GET /user - Gets all users
+// GetUsers - GET /user - Gets all users.
 func GetUsers(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/user", func(ctx *gin.Context) {
-		var u []User
-		err := c.DB.Select(&u, c.TemplateString("all_users"))
+		var users []User
+		err := c.DB.Select(&users, c.TemplateString("all_users"))
 		if err != nil {
-			panic(err) // Could not connect to database
+			panic(err)
 		}
-		ctx.JSON(http.StatusOK, conf.M{"users": u})
+		ctx.JSON(http.StatusOK, conf.M{"users": users})
 	})
 }
 
-// GetUser - GET /user/:id - Gets a single user and his uploads
+// GetUser - GET /user/:id - Gets a single user and his uploads.
 func GetUser(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/user/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)
@@ -46,8 +46,8 @@ func GetUser(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
-		u := User{}
-		err = c.DB.Get(&u, c.TemplateString("get_user"), id)
+		user := User{}
+		err = c.DB.Get(&user, c.TemplateString("get_user"), id)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				ctx.JSON(
@@ -60,16 +60,18 @@ func GetUser(r *gin.RouterGroup, c *conf.Config) {
 			panic(err)
 		}
 
-		err = c.DB.Select(&u.Uploads, c.TemplateString("user_uploads"), id)
+		err = c.DB.Select(&user.Uploads, c.TemplateString("user_uploads"), id)
 		if err != nil {
 			panic(err)
 		}
 
-		ctx.JSON(http.StatusOK, conf.M{"user": u})
+		ctx.JSON(http.StatusOK, conf.M{"user": user})
 	})
 }
 
-// Register - POST /user/register - Creates new user
+// Register - POST /user/register - Creates new user.
+// Requires "name" and "password" as fields. Accepts "role" field, which
+// defaults to "user", "uploader" and "admin" are also valid values.
 func Register(r *gin.RouterGroup, c *conf.Config) {
 	r.POST("/user/register", func(ctx *gin.Context) {
 		var data struct {
@@ -128,7 +130,8 @@ func Register(r *gin.RouterGroup, c *conf.Config) {
 	})
 }
 
-// Login - POST /user/login - Authenticates user and generates JWT
+// Login - POST /user/login - Authenticates user and generates JWT.
+// Requires "name" and "password" as fields.
 func Login(r *gin.RouterGroup, c *conf.Config) {
 	r.POST("/user/login", func(ctx *gin.Context) {
 		var data struct {
@@ -150,8 +153,8 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 
 		data.Name = strings.ToLower(data.Name)
 
-		u := User{}
-		err = c.DB.Get(&u, c.TemplateString("login"), data.Name)
+		user := User{}
+		err = c.DB.Get(&user, c.TemplateString("login"), data.Name)
 		if err != nil {
 			if err == sql.ErrNoRows {
 				ctx.JSON(http.StatusNotFound, conf.M{"err": "cannot find user"})
@@ -161,7 +164,7 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 			panic(err)
 		}
 
-		err = bcrypt.CompareHashAndPassword(u.Password, []byte(data.Password))
+		err = bcrypt.CompareHashAndPassword(user.Password, []byte(data.Password))
 		if err != nil {
 			if err == bcrypt.ErrMismatchedHashAndPassword {
 				ctx.JSON(
@@ -175,9 +178,9 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 		}
 
 		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, Claims{
-			u.ID,
-			u.Name,
-			u.Role,
+			user.ID,
+			user.Name,
+			user.Role,
 			jwt.StandardClaims{
 				ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
 			},
@@ -186,11 +189,13 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 			panic(err)
 		}
 
-		ctx.JSON(http.StatusOK, conf.M{"token": token})
+		ctx.JSON(http.StatusOK, conf.M{"token": token, "user": user})
 	})
 }
 
-// UpdateUser - PUT /user/:id - Updates user
+// UpdateUser - PUT /user/:id - Updates user.
+// Accepts "name", "password" and "role" fields. Only admins may update other
+// users and update the role.
 func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 	r.PUT("/user/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)
@@ -268,7 +273,7 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 	})
 }
 
-// DeleteUser - DELETE /user/:id - Deletes user
+// DeleteUser - DELETE /user/:id - Deletes user.
 func DeleteUser(r *gin.RouterGroup, c *conf.Config) {
 	r.DELETE("/user/:id", func(ctx *gin.Context) {
 		id, err := getID(ctx)

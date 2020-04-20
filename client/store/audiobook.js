@@ -4,6 +4,7 @@ export default {
 	state: {
 		playing: {},
 		list: [],
+		editing: {},
 	},
 	actions: {
 		async getAudiobooks({ commit }) {
@@ -15,7 +16,15 @@ export default {
 			commit("setAudiobookList", audiobooks)
 			return {}
 		},
-		async getAudiobook({ commit }, id) {
+		async getEditingAudiobook({ commit }, id) {
+			const { audiobook, err } = await getAudiobook(id)
+			if (err) {
+				return { err }
+			}
+
+			commit("setEditingAudiobook", audiobook)
+		},
+		async playAudiobook({ commit }, id) {
 			const { audiobook, err } = await getAudiobook(id)
 			if (err) {
 				return { err }
@@ -30,6 +39,9 @@ export default {
 		},
 		setPlayingAudiobook(state, audiobook) {
 			state.playing = audiobook
+		},
+		setEditingAudiobook(state, audiobook) {
+			state.editing = audiobook
 		},
 	},
 	getters: {},

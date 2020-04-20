@@ -26,8 +26,8 @@ export default {
 	display: flex
 	flex-direction: column
 	background: highlight
-	padding: 1.25em
-	text-shadow: 1px 1px 5px rgba(0, 0, 0, 0.5)
+	padding: 1.25em 0
+	text-shadow: text-shadow
 
 .nav-el
 	display: flex
@@ -35,7 +35,6 @@ export default {
 	align-items: center
 	height: 75px
 	cursor: pointer
-	border-radius: 0.25em
 	text-decoration: none
 	outline: 0
 	color: white-text
@@ -47,11 +46,10 @@ export default {
 		color: white-text
 
 	&:hover
-		background: darken(highlight, 10%)
+		background: darken(highlight, 15%)
 
 .nav-break
 	background: transparent !important
-	box-shadow: none !important
 	border: 0
 	cursor: default
 </style>
