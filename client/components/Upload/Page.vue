@@ -1,6 +1,7 @@
 <template lang="pug">
 	.upload-page
 		.half.upload-form
+			Status
 			Box
 		.half.uploads
 			List(v-show="!$route.params.id")
@@ -10,9 +11,10 @@
 <script>
 import Box from "./Box.vue"
 import List from "./List.vue"
+import Status from "./Status"
 
 export default {
-	components: { Box, List },
+	components: { Box, List, Status },
 }
 </script>
 

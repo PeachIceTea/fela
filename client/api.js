@@ -48,32 +48,17 @@ export async function deleteAudiobook(id) {
 
 // Complex
 // Handles upload
-export function upload(files, progressCallback = () => {}) {
+export function uploadAudiobook(files, progressCallback = () => {}) {
 	return new Promise(resolve => {
 		const form = new FormData()
-		// A file input element has only a single FileList which is reused
-		// when needed. To keep references to the files we need to create a
-		// new array.
-		const arr = []
 		for (let i = 0, len = files.length; i < len; i++) {
-			const file = files[i]
-			arr[i] = file
-			form.append("file", file)
+			form.append("file", files[i])
 		}
-		arr.sort((a, b) => {
-			if (a.name < b.name) {
-				return -1
-			} else if (a.name > b.name) {
-				return 1
-			} else {
-				return 0
-			}
-		})
 
 		const xhr = new XMLHttpRequest()
 		xhr.responseType = "json"
 		xhr.upload.onprogress = e => {
-			progressCallback(Math.floor(e.loaded / e.total))
+			progressCallback(e.loaded / e.total)
 		}
 		xhr.onerror = e => {
 			console.error(e)
@@ -117,7 +102,7 @@ export function updateAudiobook(
 		const xhr = new XMLHttpRequest()
 		xhr.responseType = "json"
 		xhr.upload.onprogress = e => {
-			progressCallback(Math.floor(e.loaded / e.total))
+			progressCallback(Math.floor((e.loaded / e.total) * 100))
 		}
 		xhr.onerror = e => {
 			console.error(e)

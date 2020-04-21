@@ -17,7 +17,7 @@
 						type="text"
 						placeholder="Search"
 						v-model="search")
-			tr(v-for="upload in tableUploads")
+			tr(v-for="upload in tableUploads" :key="upload.id")
 				td {{ upload.id }}
 				td {{ upload.title }}
 				td {{ upload.author }}

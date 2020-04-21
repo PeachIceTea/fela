@@ -6,6 +6,7 @@ Vue.use(Vuex)
 import auth from "./auth"
 import audiobook from "./audiobook"
 import user from "./user"
+import uploads from "./uploads"
 
 export default new Vuex.Store({
 	state: {
@@ -17,7 +18,7 @@ export default new Vuex.Store({
 		},
 	},
 	mutations: {},
-	modules: { auth, audiobook, user },
+	modules: { auth, audiobook, user, uploads },
 	getters: {
 		authors(state) {
 			const list = state.audiobook.list
