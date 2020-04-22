@@ -1,14 +1,14 @@
 <template lang="pug">
 	.login
 		form(@submit.prevent="submit")
-			input(type="text" placeholder="Username" v-model="name" required)
-			input(
+			input.input(type="text" placeholder="Username" v-model="name" required)
+			input.input(
 				type="password"
 				placeholder="Password"
 				v-model="password"
 				required
 			)
-			input(type="submit" value="Login" ref="btn")
+			input.button(type="submit" value="Login" ref="btn")
 		.err(v-show="err") Error: {{ err }}
 </template>
 
@@ -74,7 +74,6 @@ export default {
 
 border-radius = 3px
 form-width = 249px
-font-size = 20px
 
 .login
 	display: flex
@@ -82,7 +81,6 @@ font-size = 20px
 	width: 100%
 	flex-direction: column
 	align-items: center
-	font-size: font-size
 
 form
 	display: flex
@@ -92,41 +90,9 @@ form
 	box-shadow: box-shadow
 	width: form-width
 
-input
-	display: block
-	width: 100%
-	border: 0
-	color: black-text
-	padding: input-padding
-	outline: 0
-	background: offwhite
-	font-size: font-size
-
-input[type="submit"]
-	background: highlight
-	color: white-text
-	cursor: pointer
-	transition: 100ms ease all
-
-	&::-moz-focus-inner
-		border: 0
-
-	&:active
-		background: darken(highlight, 10%)
-
 input:first-child
 	border-radius: border-radius border-radius 0 0
 
 input:last-child
 	border-radius: 0 0 border-radius border-radius
-
-.err
-	margin-top: 1em
-	width: form-width
-	font-size: font-size
-	background: offwhite
-	color: black-text
-	border-radius: border-radius
-	border-top: 5px red solid
-	padding: 0.1em
 </style>

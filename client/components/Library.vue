@@ -16,7 +16,11 @@ import PlacholderCover from "../placeholder-cover.jpg"
 export default {
 	computed: {
 		audiobooks() {
-			return this.$store.state.audiobook.list
+			return this.$store.state.audiobook.list.concat().sort((a, b) => {
+				if (a.title < b.title) return -1
+				if (a.titel > b.title) return 1
+				return 0
+			})
 		},
 	},
 	methods: {
@@ -44,6 +48,7 @@ export default {
 	cursor: pointer
 	position: relative
 	width: 100%
+	height: 100%
 
 	img
 		z-index: 2

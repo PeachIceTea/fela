@@ -27,6 +27,7 @@ export default {
 
 .half
 	flex: 1
+	width: 50%
 
 .uploads
 	margin-left: 1em

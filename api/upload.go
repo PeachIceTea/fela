@@ -129,15 +129,39 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 						return
 					}
 
-					// Extract cover from first file and uses a
-					// placeholder-cover if that fails.
 					if i == 0 {
+						// Extract cover from first file. Errors are ignored, the
+						// client is expected to show a cover from the server.
+						// Also uses
 						coverPath := path.Clean(fmt.Sprintf(
 							"%s/cover/%d.jpg",
 							c.FilesPath,
 							audiobookID,
 						))
 						extractCover(file.Path, coverPath)
+
+						// Tries to get the name of the book by looking up the
+						// album name. The reason there might be none is because
+						// the entire book is contained in a single file. We use
+						// the title of the file in that case.
+						title := file.Metadata.Format.Tags.Album
+						if title == "" {
+							title = file.Metadata.Format.Tags.Title
+						}
+
+						// Extract title and author from first file.
+						a := Audiobook{
+							ID:     audiobookID,
+							Title:  &title,
+							Author: &file.Metadata.Format.Tags.Artist,
+						}
+
+						if *a.Title != "" && *a.Author != "" {
+							_, err = tx.NamedExec(
+								c.TemplateWithData("update_audiobook", a),
+								a,
+							)
+						}
 					}
 
 					files[i] = file

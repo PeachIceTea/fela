@@ -35,7 +35,7 @@
 			:style="{top: `${progressInfo.y}px`,left: `${progressInfo.x}px`}"
 		)
 			| {{ progressInfo.value | formatDuration }}
-		audio(:src="fileUrl" ref="audio")
+		audio(:src="fileUrl" autoplay ref="audio")
 </template>
 
 <script>

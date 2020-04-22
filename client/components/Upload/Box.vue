@@ -71,6 +71,7 @@ export default {
 			})
 
 			await this.$store.dispatch("upload", { files })
+			this.$store.dispatch("getAudiobooks") // refresh list
 		},
 	},
 }

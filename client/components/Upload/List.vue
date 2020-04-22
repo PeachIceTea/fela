@@ -22,9 +22,10 @@
 				td {{ upload.title }}
 				td {{ upload.author }}
 
-				td.edit
-					router-link.btn(:to="`/upload/edit/${upload.id}`") Edit
-					span.btn(@click="showDeleteDialog(upload)") Delete
+				td
+					.edit
+						router-link.btn(:to="`/upload/edit/${upload.id}`") Edit
+						span.btn(@click="showDeleteDialog(upload)") Delete
 
 		.delete-container(v-if="potentialDelete")
 			.delete-dialog
@@ -36,17 +37,20 @@
 							{{ potentialDelete.author }}"?
 					p This action is irrreversible!
 				.options
-					button(@click="deleteUpload") Yes, I am sure.
-					button(@click="cancelDelete") Cancel
+					button.button(@click="deleteUpload") Yes, I am sure.
+					button.button(@click="cancelDelete") Cancel
 </template>
 
 <script>
+import { deleteAudiobook } from "../../api"
+
 export default {
 	data() {
 		return {
 			activeTab: "user", // "user" or "all"
 			search: "",
 			potentialDelete: null,
+			deleteErr: "",
 		}
 	},
 	computed: {
@@ -67,7 +71,11 @@ export default {
 			return list
 		},
 		userUploads() {
-			return this.$store.state.user.uploads
+			const userID = this.$store.state.auth.loggedInUser.id
+			console.log(userID)
+			return this.$store.state.audiobook.list.filter(
+				a => a.uploader === userID,
+			)
 		},
 		allUploads() {
 			return this.$store.state.audiobook.list
@@ -75,10 +83,6 @@ export default {
 	},
 	created() {
 		this.$store.dispatch("getAudiobooks")
-		this.$store.dispatch(
-			"getUserUploads",
-			this.$store.state.auth.loggedInUser.id,
-		)
 	},
 	methods: {
 		switchTab(to) {
@@ -90,7 +94,15 @@ export default {
 		cancelDelete() {
 			this.potentialDelete = null
 		},
-		deleteUpload() {},
+		async deleteUpload() {
+			const res = await deleteAudiobook(this.potentialDelete.id)
+			if (res.err) {
+				this.deleteErr = res.err
+			}
+
+			this.$store.dispatch("getAudiobooks")
+			this.potentialDelete = null
+		},
 	},
 }
 </script>
@@ -106,7 +118,7 @@ border-width = 1px
 .tab-switcher
 	flex: 1
 	padding: 0.25em
-	font-size: 2em
+	font-size: 30px
 	cursor: pointer
 	border: border-width offwhite solid
 	margin-bottom: - border-width
@@ -135,13 +147,15 @@ th
 
 td, th
 	border-bottom: border-width solid offwhite
-	padding: 8px 5px 3px
+	padding: 12px 5px 3px
 
 th:last-child
 	width: 0
 
-td:last-child
+.edit
 	display: flex
+	width: 100%
+	height: 100%
 
 .search
 	margin-right: 1em
@@ -178,24 +192,4 @@ td:last-child
 
 	.options
 		display: flex
-
-	button
-		cursor: pointer
-		flex: 1
-		margin: 0 4em
-		background: highlight
-		color: white-text
-		outline: 0
-		border: 0
-		box-shadow: box-shadow
-		font-size: 20px
-		border-radius: 3px
-		text-shadow: text-shadow
-		padding: input-padding
-
-		&::-moz-focus-inner
-			border: 0
-
-	.text
-		font-size: 20px
 </style>

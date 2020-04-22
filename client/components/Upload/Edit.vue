@@ -29,7 +29,7 @@
 			.input-row
 				input(type="submit" value="Update")
 
-			.message.error(v-show="err") Error: {{ err }}
+			.message.err(v-show="err") Error: {{ err }}
 			.message.success(v-show="success") Audiobook was updated.
 		.current-cover
 			h2 Current cover
@@ -112,7 +112,6 @@ function routeHandler(to, from, next) {
 @import "../../globals"
 borderRadius = 3px
 form-width = 249px
-font-size = 20px
 padding = input-padding
 
 .upload-edit
@@ -134,11 +133,11 @@ h2
 img
 	flex: 1
 	max-width: 100%
+	max-height: 500px
 	object-fit: contain
 	background: url("../../placeholder-cover.jpg")
 
 label
-	font-size: 20px
 	font-weight: 500
 
 input, .file-input, .message
@@ -150,7 +149,6 @@ input, .file-input, .message
 	padding: padding
 	outline: 0
 	background: offwhite
-	font-size: font-size
 
 .file-input
 	cursor: pointer
@@ -160,13 +158,6 @@ input, .file-input, .message
 
 .message
 	margin: 1em 0
-	font-size: font-size
-
-.error
-	border-top: 5px red solid
-
-.success
-	border-top: 5px green solid
 
 input[type="submit"]
 	background: highlight

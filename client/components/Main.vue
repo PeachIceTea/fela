@@ -41,7 +41,7 @@ main
 	overflow-y: scroll
 	scrollbar-color: highlight darken(background, 50%)
 	flex: 10
-	background: darken(background, 15%)
+	background: background
 
 footer
 	height: 100%

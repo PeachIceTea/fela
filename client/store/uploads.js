@@ -5,6 +5,7 @@ export default {
 	actions: {
 		async upload({ commit }, upload) {
 			upload.progress = 0
+			upload.err = ""
 			commit("addUpload", upload)
 			if (upload.err) {
 				return
@@ -18,7 +19,8 @@ export default {
 				commit("assignError", { upload, err: res.err })
 				return res
 			}
-			commit("assignFileInfo", { upload, info: res.files })
+			commit("assignAudiobookID", { upload, id: res.audiobook_id })
+			return res
 		},
 	},
 	mutations: {
@@ -34,8 +36,8 @@ export default {
 		assignError(state, { upload, err }) {
 			upload.err = err
 		},
-		assignFileInfo(state, { upload, info }) {
-			upload.info = info
+		assignAudiobookID(state, { upload, id }) {
+			upload.id = id
 		},
 	},
 	getters: {},

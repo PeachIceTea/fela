@@ -1,14 +1,27 @@
 <template lang="pug">
 	.navbar
 		router-link.nav-el(to="/") Library
-		router-link.nav-el(to="/upload") Upload
-		.nav-el.nav-break
+		.nav-el.nav-break(v-if="uploader")
+		router-link.nav-el(to="/upload" v-if="uploader") Upload
+		router-link.nav-el(to="/admin" v-if="admin") Admin
+		.nav-el.nav-break(v-if="uploader")
 		router-link.nav-el(to="/settings") Settings
 		span.nav-el(@click="logout") Logout
 </template>
 
 <script>
 export default {
+	computed: {
+		userRole() {
+			return this.$store.state.auth.loggedInUser.role
+		},
+		admin() {
+			return this.userRole === "admin"
+		},
+		uploader() {
+			return this.userRole === "admin" || this.userRole === "uploader"
+		},
+	},
 	methods: {
 		logout() {
 			this.$store.dispatch("logout")
@@ -28,7 +41,6 @@ export default {
 	background: highlight
 	padding: 1.25em 0
 	text-shadow: text-shadow
-
 .nav-el
 	display: flex
 	justify-content: center
@@ -38,9 +50,10 @@ export default {
 	text-decoration: none
 	outline: 0
 	color: white-text
-	font-size: 20px
 	transition: 250ms all ease
 	margin-top: 10px
+	font-size: 25px
+
 
 	&:visited
 		color: white-text
