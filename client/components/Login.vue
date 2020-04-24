@@ -9,7 +9,8 @@
 				required
 			)
 			input.button(type="submit" value="Login" ref="btn")
-		.err(v-show="err") Error: {{ err }}
+
+			.err(v-show="err") Error: {{ err }}
 </template>
 
 <script>
@@ -25,6 +26,10 @@ export default {
 		}
 	},
 	methods: {
+		// Runs when the form is submitted. Passes the values of the two inputs
+		// to the API and redirects to the main page if the API does not return
+		// an error. It also starts a small animation to indicate to the user
+		// that the login is happening.
 		async submit() {
 			this.animate = true
 			this.animation()
@@ -45,6 +50,9 @@ export default {
 
 			this.animate = false
 		},
+
+		// Animates three dots on the login button to indicate to the user that
+		// their request is being processed.
 		animation() {
 			const btn = this.$refs.btn
 			if (this.animate) {
@@ -69,30 +77,47 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import "../globals.styl"
+<style lang="less" scoped>
+@import "../globals.less";
 
-border-radius = 3px
-form-width = 249px
+.login {
+	display: flex;
+	align-items: center;
+	flex-direction: column;
+}
 
-.login
-	display: flex
-	height: 100%
-	width: 100%
-	flex-direction: column
-	align-items: center
+form {
+	width: 250px;
+	margin-top: 100px;
 
-form
-	display: flex
-	flex-direction: column
-	align-items: center
-	margin-top: 10vh
-	box-shadow: box-shadow
-	width: form-width
+	.boxShadow();
+}
 
-input:first-child
-	border-radius: border-radius border-radius 0 0
+input {
+	font-size: 20px;
+	width: 100%;
+	border: 0;
+	outline: 0;
+	border-radius: 0px;
+	padding: 11px 10px 9px;
+	color: @black-text;
 
-input:last-child
-	border-radius: 0 0 border-radius border-radius
+	&:first-child {
+		border-radius: @border-radius @border-radius 0 0;
+	}
+}
+
+input[type="submit"] {
+	border-radius: 0 0 @border-radius @border-radius;
+	background: @highlight;
+	color: @white-text;
+}
+
+.err {
+	.container();
+
+	border-top: 5px solid @err;
+	margin-top: 1em;
+	width: 100%;
+}
 </style>

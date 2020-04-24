@@ -1,10 +1,9 @@
 <template lang="pug">
 	.app
-		.not-player
-			nav
-				Navbar
-			main
-				router-view
+		nav
+			Navbar
+		main
+			router-view
 		footer
 			Player
 </template>
@@ -18,33 +17,66 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import "../globals.styl"
+<style lang="less" scoped>
+@import "../globals.less";
 
-.app
-	height: 100vh
-	width: 100vw
-	display: flex
-	flex-direction: column
+@scrollbar-background: darken(@background, 5%);
 
-.not-player
-	height: 100%
-	display: flex
-	flex-direction: row
-	flex-grow: 1
-	min-height: 0
+.app {
+	min-height: 100%;
+	width: 100%;
+	height: 100%;
+	position: relative;
+	display: grid;
+	grid-template-rows: 1fr auto;
+	grid-template-columns: auto 1fr;
+	grid-template-areas:
+		"nav-bar main-content"
+		"currently-playing currently-playing";
+}
 
-nav
-	flex: 1
+nav {
+	grid-area: nav-bar;
+	width: 350px;
+	box-shadow: 2px 0px 10px 0px rgba(0, 0, 0, 0.25);
+	z-index: 2;
+}
 
-main
-	overflow-y: scroll
-	scrollbar-color: highlight darken(background, 50%)
-	flex: 10
-	background: background
+main {
+	grid-area: main-content;
+	width: 100%;
+	height: 100%;
+	position: relative;
+	overflow-y: scroll;
+	overflow-x: hidden;
+	min-height: 0;
+	scrollbar-color: @highlight @scrollbar-background;
+}
 
-footer
-	height: 100%
-	flex: 100
-	border: 1px solid #000
+main::-webkit-scrollbar {
+	background: @scrollbar-background;
+}
+
+main::-webkit-scrollbar-track {
+	background: @scrollbar-background;
+}
+
+main::-webkit-scrollbar-thumb {
+	background: @highlight;
+}
+
+footer {
+	grid-area: currently-playing;
+	width: 100%;
+	z-index: 4;
+	box-shadow: 0px -2px 10px 0px rgba(0, 0, 0, 0.25);
+
+	.child {
+		display: flex;
+		height: auto;
+		-webkit-box-orient: vertical;
+
+		-webkit-box-direction: normal;
+	}
+}
 </style>

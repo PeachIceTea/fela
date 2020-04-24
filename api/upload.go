@@ -176,9 +176,15 @@ func Upload(r *gin.RouterGroup, c *conf.Config) {
 			panic(err)
 		}
 
+		a := &Audiobook{}
+		err = tx.Get(a, c.TemplateString("get_audiobook"), audiobookID)
+		if err != nil {
+			panic(err)
+		}
+
 		ctx.JSON(
 			http.StatusOK,
-			conf.M{"audiobook_id": audiobookID, "files": files},
+			conf.M{"audiobook": a},
 		)
 	})
 }

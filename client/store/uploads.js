@@ -3,15 +3,14 @@ import { uploadAudiobook } from "../api"
 export default {
 	state: [],
 	actions: {
-		async upload({ commit }, upload) {
-			upload.progress = 0
-			upload.err = ""
-			commit("addUpload", upload)
-			if (upload.err) {
+		async upload({ commit }, { files, err }) {
+			if (err) {
+				commit("addUpload", { files, err })
 				return
 			}
 
-			commit("startUpload", upload)
+			const upload = { files, err: "", progress: 0 }
+			commit("addUpload", upload)
 			const res = await uploadAudiobook(upload.files, progress => {
 				commit("updateProgress", { upload, progress })
 			})
@@ -26,9 +25,6 @@ export default {
 	mutations: {
 		addUpload(state, upload) {
 			state.push(upload)
-		},
-		startUpload(state, upload) {
-			upload.progress = 0
 		},
 		updateProgress(state, { upload, progress }) {
 			upload.progress = progress

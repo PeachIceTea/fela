@@ -3,7 +3,7 @@ import { login, testToken } from "../api"
 export default {
 	state: {
 		token: null,
-		loggedInUser: null,
+		loggedInUser: {},
 	},
 	actions: {
 		async login({ commit }, { name, password }) {
@@ -36,7 +36,7 @@ export default {
 			localStorage.removeItem("token")
 			localStorage.removeItem("user")
 			commit("setToken", null)
-			commit("setLoggedInUser", null)
+			commit("setLoggedInUser", {})
 		},
 	},
 	mutations: {
@@ -47,5 +47,13 @@ export default {
 			state.loggedInUser = user
 		},
 	},
-	getters: {},
+	getters: {
+		isUploader(state) {
+			const role = state.loggedInUser.role
+			return role === "uploader" || role === "admin"
+		},
+		isAdmin(state) {
+			return state.loggedInUser.role === "admin"
+		},
+	},
 }

@@ -1,6 +1,6 @@
 <template lang="pug">
 	.player(v-show="audiobook.files")
-		.progress-bar(
+		.progressbar(
 			ref="progress"
 			@click="handleProgressClick"
 			@mouseenter="showProgressInfo"
@@ -8,15 +8,14 @@
 			@mouseleave="hideProgressInfo"
 		)
 			.played(:style="{width: `${currentTime/totalDuration*100}%`}")
-		.everything-else
-			.info.col
-				.book-info.col(style="display: inline")
+		.content
+			.col
+				.cover
+					img(:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`")
+				.book-info(style="display: inline")
 					p {{ audiobook.title }}
-					p {{ audiobook.author }}
-				.playback-info.col
-					| {{ currentTime | formatDuration }} /
-					|  {{ totalDuration | formatDuration }}
-			.playback.col
+					p by {{ audiobook.author }}
+			.col
 				.control(@click="rewind")
 					Rewind.control-symbol
 				.control(@click="toggle")
@@ -24,18 +23,16 @@
 					Play.control-symbol(v-show="paused")
 				.control(@click="forward")
 					FastForward.control-symbol
-			.knobs.col
-				.speed.col
-				.volume.col(@mousedown="handleVolumeClick" ref="volume")
-					.volume-bar
-						.filled(:style="{width: `${volume*100}%`}")
+			.col
+				| {{ currentTime | duration }} /
+				|  {{ totalDuration | duration }}
 		.progress-info(
 			ref="progressInfo"
 			v-show="progressInfo.show"
 			:style="{top: `${progressInfo.y}px`,left: `${progressInfo.x}px`}"
 		)
-			| {{ progressInfo.value | formatDuration }}
-		audio(:src="fileUrl" autoplay ref="audio")
+			| {{ progressInfo.value | duration }}
+		audio(:src="fileUrl" ref="audio")
 </template>
 
 <script>
@@ -157,8 +154,9 @@ export default {
 			this.progressInfo.show = false
 		},
 		moveProgressInfo(e) {
+			const bounds = this.$refs.progress.getBoundingClientRect()
 			this.progressInfo.value =
-				(this.totalDuration * e.clientX) / screen.width
+				(this.totalDuration * e.clientX) / bounds.width
 			this.progressInfo.x =
 				e.clientX -
 				this.$refs.progressInfo.getBoundingClientRect().width / 2
@@ -182,96 +180,98 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import "../globals"
-player-height = 5.5em
-progress-bar-height = 1.5em
+<style lang="less" scoped>
+@import "../globals.less";
 
-.player
-	display: flex
-	width: 100%
-	height: player-height
-	flex-direction: column
-	background: player-background
-	text-shadow: text-shadow
+.player {
+	width: 100%;
+	background: darken(@background, 5%);
+}
 
-.everything-else
-	display: flex
-	padding: 1em
-	flex: 1
-	height: 100%
+.progressbar {
+	height: 0.5em;
+	width: 100%;
+	background: lighten(@background, 5%);
+	transition: 250ms all ease;
+	cursor: pointer;
 
-.playback
-	justify-content: center
+	&:hover {
+		height: 1.25em;
+	}
+}
 
-.col
-	display: flex
-	align-items: center
-	flex: 1
+.content {
+	display: flex;
+	flex-direction: row;
+	padding: 1em;
+}
 
-.info
-	p
-		margin: 5px 0 0 5px
+.col {
+	flex: 1;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	justify-content: center;
+}
 
-.control
-	margin-left: 2em
-	display: inline
-	transition: 100ms all ease
-	cursor: pointer
-	fill: black-text
+.book-info {
+	flex: 1;
+	font-size: 20px;
+}
 
-	&:hover
-		fill: white-text
+.playback-info {
+	flex: 1;
+}
 
+p {
+	margin: 0.5em 0;
+}
 
-.control-symbol
-	height: 100%
-	width: 2em
-	cursor: pointer
+.cover {
+	max-height: 100px;
+	margin-right: 1em;
 
-.knobs
-	justify-content: right
+	&:last-child {
+		justify-content: flex-end;
+	}
+}
 
-.volume-bar
-	width: 100%
-	height: progress-bar-height - 0.5em
-	border-radius: 5px
-	background: darken(black-text, 40%)
-	cursor: pointer
-	box-shadow: box-shadow
+img {
+	max-height: inherit;
+	max-width: inherit;
+	border-radius: @border-radius;
 
-	.filled
-		border-radius: 5px
-		height: 100%
-		width: 50%
-		background: offwhite
-		transition: 100ms all ease
-		cursor: inherit
-		box-shadow: inherit
+	.boxShadow();
+}
 
-.progress-bar
-	z-index: 2
-	height: 0.5em
-	background: darken(black-text, 30%)
-	cursor: pointer
-	transition: 100ms all ease
-	margin: -0.5em
-	box-shadow: 0px -5px 15px 0px rgba(0,0,0,0.25)
+.control {
+	flex: 1;
+	display: flex;
+	transition: 100ms all ease;
+	cursor: pointer;
+	fill: @black-text;
+	justify-content: center;
+	font-size: 20px;
 
-	&:hover
-		height: progress-bar-height
-		margin-top: - progress-bar-height
+	&:hover {
+		fill: @white-text;
+	}
+}
 
-	.played
-		height: 100%
-		width: 50%
-		background: offwhite
-		transition: 250ms all ease
-		cursor: inherit
+.control-symbol {
+	height: 100%;
+	width: 2em;
+	cursor: pointer;
+}
 
-.progress-info
-	position: absolute
-	background: background
-	padding: 0.5em
-	bottom: player-height + progress-bar-height + 0.25em
+.progress-info {
+	position: absolute;
+	bottom: 10em;
+	text-shadow: 2px 2px 3px rgba(0, 0, 0, 1);
+}
+
+.played {
+	height: 100%;
+	background: @offwhite;
+}
 </style>

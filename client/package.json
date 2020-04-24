@@ -1,6 +1,8 @@
 {
 	"private": true,
 	"dependencies": {
+		"fuse.js": "^5.2.3",
+		"normalize.css": "^8.0.1",
 		"parcel": "^1.12.4",
 		"vue": "^2.0.0",
 		"vue-hot-reload-api": "^2.3.4",
@@ -13,6 +15,7 @@
 		"babel-helper-vue-jsx-merge-props": "^2.0.0",
 		"babel-plugin-transform-vue-jsx": "^3.7.0",
 		"babel-preset-env": "^1.7.0",
+		"less": "^3.11.1",
 		"pug": "^2.0.4",
 		"stylus": "^0.54.7",
 		"typescript": "^3.8.3",

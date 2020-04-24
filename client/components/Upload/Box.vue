@@ -5,7 +5,7 @@
 			@drop.stop.prevent="dropFile"
 			@dragover.stop.prevent="dragOver"
 			@dragleave.stop.prevent="dragExit"
-			:class="{dragover: fileHovering}"
+			:class="{'file-hovering': fileHovering}"
 		)
 			.text
 				p #[b Click to choose files]
@@ -21,23 +21,29 @@ export default {
 		}
 	},
 	methods: {
+		// Called when a file is let
 		dropFile(e) {
 			this.fileHovering = false
 			const files = e.dataTransfer.files
-			for (let i = 0, len = files.length; i < len; i++) {
-				// Not all files are assigned a mime. As an example Firefox does
-				// not assign one for ".m4b"s. We will just have to assume the
-				// user knows what they are doing if we cannot check the mime.
-				const file = files[i]
-				const type = file.type
-				if (type && !type.includes("audio")) {
-					this.$store.dispatch("upload", {
-						err: `${file.name}: invalid file type "${type}"`,
-					})
-					return
+			if (files) {
+				console.log(1, files)
+				for (let i = 0, len = files.length; i < len; i++) {
+					// Not all files are assigned a mime. As an example Firefox does
+					// not assign one for ".m4b"s. We will just have to assume the
+					// user knows what they are doing if we cannot check the mime.
+					const file = files[i]
+					const type = file.type
+					if (type && !type.includes("audio")) {
+						this.$store.dispatch("upload", {
+							files,
+							err: `${file.name}: invalid file type "${type}"`,
+						})
+						return
+					}
 				}
+				console.log(2, files)
+				this.handleFiles(files)
 			}
-			this.handleFiles(files)
 		},
 		dragOver(e) {
 			e.dataTransfer.dropEffect = "copy"
@@ -51,6 +57,7 @@ export default {
 			e.srcElement.value = ""
 		},
 		async handleFiles(arr) {
+			console.log(3, arr)
 			// A file input element has only a single FileList which is reused
 			// when needed. To keep references to the files we need to create a
 			// new array. Additionally this gives us access to array functions
@@ -77,32 +84,25 @@ export default {
 }
 </script>
 
-<style lang="stylus" scoped>
-@import "../../globals"
+<style lang="less" scoped>
+@import "../../globals.less";
 
-.upload-box
-	width: 100%
-	outline: 2px dashed offwhite
-	border-radius: 3px
-	background: lighten(background, 2.5%)
-	cursor: pointer
-	display: inline-block
-	padding: 5em
-	text-align: center
+.upload-box {
+	.container();
 
-	&.dragover
-		background: lighten(background, 10%)
+	width: 100%;
+	height: 100%;
+	text-align: center;
+	cursor: pointer;
+	padding: 4em;
+	transition: 250ms all ease;
+}
 
-.text
-	cursor: inherit
+label {
+	cursor: pointer;
+}
 
-p
-	cursor: inherit
-
-input[type="file"]
-	width: 1px
-	height: 1px
-	position: absolute
-	left: -1px
-	outline: none
+.file-hovering {
+	background: lighten(@background, 25%);
+}
 </style>

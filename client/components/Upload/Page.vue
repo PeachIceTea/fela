@@ -1,34 +1,22 @@
 <template lang="pug">
 	.upload-page
-		.half.upload-form
-			Status
-			Box
-		.half.uploads
-			List(v-show="!$route.params.id")
-			router-view(v-show="$route.params.id")
+		Status
+		Box
 </template>
 
 <script>
 import Box from "./Box.vue"
-import List from "./List.vue"
-import Status from "./Status"
+import Status from "./Status.vue"
 
 export default {
-	components: { Box, List, Status },
+	components: { Box, Status },
 }
 </script>
 
-<style lang="stylus" scoped>
-@import "../../globals"
+<style lang="less" scoped>
+@import "../../globals.less";
 
-.upload-page
-	display: flex
-	padding: 1em
-
-.half
-	flex: 1
-	width: 50%
-
-.uploads
-	margin-left: 1em
+.upload-page {
+	padding: 1em;
+}
 </style>
