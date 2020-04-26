@@ -27,7 +27,7 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 	}
 
 	protected := v1.Group("/")
-	protected.Use(authRequired(c))
+	protected.Use(authHeaderRequired(c))
 	{
 
 		GetUsers(protected, c)
@@ -47,12 +47,13 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 			ctx.JSON(http.StatusOK, conf.M{"msg": "token is valid"})
 		})
 	}
+
+	ServeFiles(r, c)
 }
 
-// The authRequired requires request to carry a valid JWT in the Authorization
-// header using the Bearer schema.
-//TODO: improve
-func authRequired(c *conf.Config) gin.HandlerFunc {
+// The authHeaderRequired guard requires a request to carry a valid JWT in the
+// Authorization header using the Bearer schema.
+func authHeaderRequired(c *conf.Config) gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 		authStr := ctx.GetHeader("Authorization")
 		if authStr == "" {
@@ -72,25 +73,11 @@ func authRequired(c *conf.Config) gin.HandlerFunc {
 			return
 		}
 
-		claims := Claims{}
-		_, err := jwt.ParseWithClaims(
-			header[1],
-			&claims,
-			func(token *jwt.Token) (interface{}, error) {
-				if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
-					return nil, fmt.Errorf(
-						"Unexpected signing method: %v",
-						token.Header["alg"],
-					)
-				}
-
-				return c.Secret, nil
-			},
-		)
+		claims, err := parseToken(header[1], c)
 		if err != nil {
 			ctx.AbortWithStatusJSON(
 				http.StatusBadRequest,
-				conf.M{"err": err.Error()},
+				conf.M{"err": "could not parse auth token"},
 			)
 			return
 		}
@@ -98,6 +85,26 @@ func authRequired(c *conf.Config) gin.HandlerFunc {
 		ctx.Set("claims", claims)
 		ctx.Next()
 	}
+}
+
+// parseToken parses the JWT token and returns its claims.
+func parseToken(token string, c *conf.Config) (claims *Claims, err error) {
+	claims = &Claims{}
+	_, err = jwt.ParseWithClaims(
+		token,
+		claims,
+		func(token *jwt.Token) (interface{}, error) {
+			if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+				return nil, fmt.Errorf(
+					"Unexpected signing method: %v",
+					token.Header["alg"],
+				)
+			}
+
+			return c.Secret, nil
+		},
+	)
+	return
 }
 
 // getID extracts :id from URL.

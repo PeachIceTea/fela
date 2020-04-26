@@ -11,7 +11,10 @@
 		.content
 			.col
 				.cover
-					img(:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`")
+					img(
+						:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
+						@error="noImage"
+					)
 				.book-info(style="display: inline")
 					p {{ audiobook.title }}
 					p by {{ audiobook.author }}
@@ -40,6 +43,7 @@ import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
 import FastForward from "./svg/FastForward.vue"
 import Rewind from "./svg/Rewind.vue"
+import PlacholderCover from "../placeholder-cover.jpg"
 
 export default {
 	data() {
@@ -160,6 +164,9 @@ export default {
 			this.progressInfo.x =
 				e.clientX -
 				this.$refs.progressInfo.getBoundingClientRect().width / 2
+		},
+		noImage(e) {
+			e.srcElement.src = PlacholderCover
 		},
 	},
 	created() {

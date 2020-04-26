@@ -6,14 +6,14 @@
 				@click="play(audiobook)"
 			)
 				img(
-					:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
+					:src="coverURL(audiobook.id)"
 					@error="noImage"
 				)
 		.list-library(v-show="!coverViewActive")
 			.item(v-for="audiobook in audiobooks")
 				.small-cover
 					img(
-						:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
+						:src="coverURL(audiobook.id)"
 						@error="noImage"
 					)
 				.text
@@ -27,6 +27,7 @@
 
 <script>
 import Fuse from "fuse.js"
+import { coverURL } from "../api"
 import PlacholderCover from "../placeholder-cover.jpg"
 
 export default {
@@ -104,6 +105,9 @@ export default {
 		noImage(e) {
 			e.srcElement.src = PlacholderCover
 		},
+
+		// Makes coverURL api helper usable in the Vuejs template
+		coverURL,
 	},
 	created() {
 		this.$store.dispatch("getAudiobooks")

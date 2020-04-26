@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/gin-contrib/cors"
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"github.com/PeachIceTea/fela/api"
@@ -30,8 +29,6 @@ func main() {
 	r.GET("/", func(c *gin.Context) {
 		c.JSON(http.StatusOK, gin.H{"msg": "Hello, World!"})
 	})
-
-	r.Use(static.Serve("/files", static.LocalFile("files", false)))
 
 	api.RegisterRoutes(r.Group("/"), c)
 	r.Run()

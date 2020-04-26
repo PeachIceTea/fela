@@ -111,6 +111,7 @@ input[type="submit"] {
 	border-radius: 0 0 @border-radius @border-radius;
 	background: @highlight;
 	color: @white-text;
+	box-shadow: none;
 }
 
 .err {

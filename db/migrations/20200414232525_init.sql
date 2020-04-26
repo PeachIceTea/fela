@@ -44,6 +44,9 @@ CREATE TABLE file (
 );
 
 INSERT INTO user (name, password, role)
+VALUES ('unknown', '', 'listener')
+
+INSERT INTO user (name, password, role)
 VALUES ('admin', '$2y$10$ddqHCunFxTAZxznsuk.O7.RrOc3Hx1s.LIbCo8d4.XapAOUIVRU3O', 'admin')
 
 -- migrate:down

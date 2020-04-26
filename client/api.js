@@ -72,7 +72,7 @@ export function uploadAudiobook(files, progressCallback = () => {}) {
 			}
 		}
 		try {
-			xhr.open("POST", url("/audiobook/upload"))
+			xhr.open("POST", apiURL("/audiobook/upload"))
 			xhr.setRequestHeader("Authorization", getAuthHeader())
 			xhr.send(form)
 		} catch (e) {
@@ -116,7 +116,7 @@ export function updateAudiobook(
 			}
 		}
 		try {
-			xhr.open("PUT", url(`/audiobook/${id}`))
+			xhr.open("PUT", apiURL(`/audiobook/${id}`))
 			xhr.setRequestHeader("Authorization", getAuthHeader())
 			xhr.send(form)
 		} catch (e) {
@@ -173,12 +173,24 @@ export const getAuthHeader = () => `Bearer ${store.state.auth.token}`
 
 export async function api(route, config) {
 	try {
-		return await (await fetch(url(route), config)).json()
+		return await (await fetch(apiURL(route), config)).json()
 	} catch (e) {
 		return { err: "cannot connect to server" }
 	}
 }
 
-export function url(route) {
+export function apiURL(route) {
 	return `http://localhost:8080/api/v1${route}`
+}
+
+// Fileurl
+export function audiobookURL(name) {
+	const token = encodeURIComponent(store.state.auth.token)
+	name = encodeURIComponent(name)
+	return `http://localhost:8080/files/audio/${name}?auth=${token}`
+}
+
+export function coverURL(id) {
+	const token = encodeURIComponent(store.state.auth.token)
+	return `http://localhost:8080/files/cover/${id}.jpg?auth=${token}`
 }
