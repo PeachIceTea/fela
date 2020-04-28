@@ -1,60 +1,58 @@
 <template lang="pug">
 	.upload-edit
-		.content-container
-			.content
-				form(@submit.prevent="submit")
-					h2 Edit book \#{{ id }}
-					.input-row
-						label Title
-							.input-container
-								input(
-									type="text"
-									v-model="title"
-									placeholder="Title"
-								)
-					.input-row
-						label Author
-							.input-container
-								input(
-									type="text"
-									v-model="author"
-									placeholder="Author"
-									list="authors"
-								)
-					.input-row
-						label New cover
-							.file-input
-								span(v-if="!cover")
-									| Click here to select a new cover
-								span(v-else="cover") "{{ cover.name }}"
-							input(
-								type="file"
-								accept="image/png, image/jpeg"
-								@input="newCover"
-							)
-					.input-row
-						input(type="submit" value="Update")
-
-					.input-row
-						button(@click.prevent="deleteAudiobook")
-							span(v-if="!deleting") Delete Audiobook
-							span(v-else) Are you sure?
-
-					.message.err(v-show="err") Error: {{ err }}
-					.message.success(v-show="success") Audiobook was updated.
-				.current-cover
-					h2 Current cover
-					img(
-						:src="`http://localhost:8080/files/cover/${id}.jpg`"
-						@error="noImage"
-						alt="Current cover"
+		form(@submit.prevent="submit")
+			h2 Edit book \#{{ id }}
+			.input-row
+				label Title
+					.input-container
+						input(
+							type="text"
+							v-model="title"
+							placeholder="Title"
+						)
+			.input-row
+				label Author
+					.input-container
+						input(
+							type="text"
+							v-model="author"
+							placeholder="Author"
+							list="authors"
+						)
+			.input-row
+				label New cover
+					.file-input
+						span(v-if="!cover")
+							| Click here to select a new cover
+						span(v-else="cover") "{{ cover.name }}"
+					input(
+						type="file"
+						accept="image/png, image/jpeg"
+						@input="newCover"
 					)
-				datalist#authors
-					option(v-for="author in authors" :value="author")
+			.input-row
+				input(type="submit" value="Update")
+
+			.input-row
+				button(@click.prevent="deleteAudiobook")
+					span(v-if="!deleting") Delete Audiobook
+					span(v-else) Are you sure?
+
+			.message.err(v-show="err") Error: {{ err }}
+			.message.success(v-show="success") Audiobook was updated.
+		.current-cover
+			h2 Current cover
+			img(
+				:src="coverURL(id)"
+				@error="noImage"
+				alt="Current cover"
+			)
+		datalist#authors
+			option(v-for="author in authors" :value="author")
 </template>
 
 <script>
-import { updateAudiobook, deleteAudiobook } from "../api"
+import { updateAudiobook, deleteAudiobook, coverURL } from "../api"
 import PlacholderCover from "../placeholder-cover.jpg"
 
 export default {
@@ -119,6 +117,7 @@ export default {
 			this.$store.dispatch("getAudiobooks")
 			this.$router.push("/")
 		},
+		coverURL,
 	},
 	beforeRouteEnter: routeHandler,
 	beforeRouteUpdate: routeHandler,
@@ -141,17 +140,8 @@ function routeHandler(to, from, next) {
 	display: flex;
 	justify-content: center;
 	margin: 1em;
-}
-
-.content-container {
 	.container();
-	display: inline-block;
 }
-
-.content {
-	display: flex;
-}
-
 form {
 	flex: 1;
 	display: inline-block;

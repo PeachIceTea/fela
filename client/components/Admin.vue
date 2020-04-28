@@ -24,6 +24,8 @@
 				button Save
 			.column
 				button Delete
+		.row
+			button New User
 </template>
 
 <script>
