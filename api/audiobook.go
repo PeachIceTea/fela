@@ -18,7 +18,7 @@ type Audiobook struct {
 	ID        int64   `db:"id" json:"id"`
 	Title     *string `db:"title" json:"title"`
 	Author    *string `db:"author" json:"author"`
-	Uploader  int64   `db:"uploader" json:"uploader"`
+	Uploader  *int64  `db:"uploader" json:"uploader"`
 	CreatedAt string  `db:"created_at" json:"created_at"`
 	UpdatedAt *string `db:"updated_at" json:"updated_at"`
 

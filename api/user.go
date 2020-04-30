@@ -320,8 +320,21 @@ func DeleteUser(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
+		tx, err := c.DB.Beginx()
+		if err != nil {
+			panic(err)
+		}
+		defer tx.Commit()
+
+		_, err = tx.Exec(c.TemplateString("remove_uploader"), id)
+		if err != nil {
+			tx.Rollback()
+			panic(err)
+		}
+
 		_, err = c.DB.Exec(c.TemplateString("delete_user"), id)
 		if err != nil {
+			tx.Rollback()
 			panic(err)
 		}
 

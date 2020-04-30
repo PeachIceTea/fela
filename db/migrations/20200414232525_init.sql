@@ -17,7 +17,7 @@ CREATE TABLE audiobook (
 	title VARCHAR(255),
 	author VARCHAR(255),
 
-	uploader BIGINT NOT NULL,
+	uploader BIGINT,
 
 	created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 	updated_at DATETIME ON UPDATE CURRENT_TIMESTAMP,
@@ -44,10 +44,7 @@ CREATE TABLE file (
 );
 
 INSERT INTO user (name, password, role)
-VALUES ('unknown', '', 'user')
-
-INSERT INTO user (name, password, role)
-VALUES ('admin', '$2y$10$ddqHCunFxTAZxznsuk.O7.RrOc3Hx1s.LIbCo8d4.XapAOUIVRU3O', 'admin')
+VALUES ('admin', '$2y$10$ddqHCunFxTAZxznsuk.O7.RrOc3Hx1s.LIbCo8d4.XapAOUIVRU3O', 'admin');
 
 -- migrate:down
 DROP VIEW audiobook_with_duration;
