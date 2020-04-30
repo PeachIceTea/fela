@@ -2,30 +2,19 @@
 	.admin
 		.row.header
 			.column Username
-			.column Password
 			.column Role
 			.column Created
 			.column Last Updated
-			.column Save
-			.column Delete
+			.column Edit
 		.row.user(v-for="user in users")
-			.column
-				input(type="text" :value="user.name" placeholder="Username")
-			.column
-				input(type="password" placeholder="Password")
-			.column
-				select
-					option(value="listener" :selected="user.role === 'listener'") Listener
-					option(value="uploader" :selected="user.role === 'uploader'") Uploader
-					option(value="admin" :selected="user.role === 'admin'") Admin
+			.column {{ user.name | title}}
+			.column {{ user.role | title }}
 			.column {{ user.created_at }}
 			.column {{ user.updated_at }}
 			.column
-				button Save
-			.column
-				button Delete
+				button(@click="edit(user)") Edit
 		.row
-			button New User
+			button(@click="newUser") New User
 </template>
 
 <script>
@@ -40,11 +29,19 @@ export default {
 			vm.$store.dispatch("getAllUsers")
 		})
 	},
+	methods: {
+		edit(user) {
+			this.$router.push(`/user/${user.id}/edit`)
+		},
+		newUser(user) {
+			this.$router.push(`/user/new/edit`)
+		},
+	},
 }
 </script>
 
 <style lang="less" scoped>
-@import "../globals.less";
+@import "../../globals.less";
 
 .admin {
 	display: grid;
@@ -53,15 +50,12 @@ export default {
 
 .row {
 	display: grid;
-	grid-template-columns: repeat(7, 1fr);
+	grid-template-columns: repeat(5, 1fr);
+	margin-bottom: 1em;
 }
 
 .column {
 	padding: 0.25em;
-}
-
-.header {
-	padding: 1em;
 }
 
 .user {

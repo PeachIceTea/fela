@@ -12,7 +12,7 @@
 			.col
 				.cover
 					img(
-						:src="`http://localhost:8080/files/cover/${audiobook.id}.jpg`"
+						:src="coverURL(audiobook.id)"
 						@error="noImage"
 					)
 				.book-info(style="display: inline")
@@ -39,6 +39,8 @@
 </template>
 
 <script>
+import { coverURL, audiobookURL } from "../api"
+
 import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
 import FastForward from "./svg/FastForward.vue"
@@ -75,7 +77,10 @@ export default {
 		fileUrl() {
 			const audiobook = this.audiobook
 			if (audiobook.files) {
-				return `http://localhost:8080/files/audio/${audiobook.id}/${audiobook.files[0].name}`
+				return audiobookURL(
+					this.audiobook.id,
+					this.audiobook.files[0].name,
+				)
 			}
 		},
 	},
@@ -168,6 +173,7 @@ export default {
 		noImage(e) {
 			e.srcElement.src = PlacholderCover
 		},
+		coverURL,
 	},
 	created() {
 		document.addEventListener("keydown", this.keyHandler)

@@ -13,8 +13,8 @@
 						span(v-if="i + 1 !== upload.files.length") ,&#32;
 				.message(v-show="!upload.err && upload.progress !== 1")
 					| Progress {{ (upload.progress * 100).toFixed(2) }}%
-				.message.err(v-if="upload.err") Error: {{ upload.err }}
-				.message.success(v-if="!upload.err && upload.progress === 1")
+				.message(v-if="upload.err") Error: {{ upload.err }}
+				.message(v-if="!upload.err && upload.progress === 1")
 					| Upload finished
 </template>
 

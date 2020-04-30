@@ -143,11 +143,11 @@ func (c *Claims) isUploader() bool {
 
 // getClaims extracts a claims struct from gin.Context.
 // This will panic when used in unprotected routes.
-func getClaims(ctx *gin.Context) (c Claims) {
+func getClaims(ctx *gin.Context) (c *Claims) {
 	claims, ok := ctx.Get("claims")
 	if !ok {
 		panic("could not get claims from context")
 	}
 
-	return claims.(Claims)
+	return claims.(*Claims)
 }

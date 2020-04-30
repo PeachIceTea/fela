@@ -17,8 +17,8 @@ export async function login(name, password) {
 	return await POST("/user/login", { name, password })
 }
 
-export async function updateUser(id, { name, password, role }) {
-	return await PUT(`/user/${id}`, { name, password, role })
+export async function updateUser(id, { name, password, role, confirmation }) {
+	return await PUT(`/user/${id}`, { name, password, role, confirmation })
 }
 
 export async function deleteUser(id) {
@@ -184,10 +184,10 @@ export function apiURL(route) {
 }
 
 // Fileurl
-export function audiobookURL(name) {
+export function audiobookURL(id, filename) {
 	const token = encodeURIComponent(store.state.auth.token)
 	name = encodeURIComponent(name)
-	return `http://localhost:8080/files/audio/${name}?auth=${token}`
+	return `http://localhost:8080/files/audio/${id}/${filename}?auth=${token}`
 }
 
 export function coverURL(id) {

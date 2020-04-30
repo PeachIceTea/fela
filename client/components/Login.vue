@@ -1,5 +1,6 @@
 <template lang="pug">
 	.login
+		h1 Fela
 		form(@submit.prevent="submit")
 			input.input(type="text" placeholder="Username" v-model="name" required)
 			input.input(
@@ -86,9 +87,13 @@ export default {
 	flex-direction: column;
 }
 
+h1 {
+	margin-top: 75px;
+}
+
 form {
 	width: 250px;
-	margin-top: 100px;
+	margin-top: 25px;
 
 	.boxShadow();
 }

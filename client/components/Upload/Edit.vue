@@ -52,8 +52,8 @@
 </template>
 
 <script>
-import { updateAudiobook, deleteAudiobook, coverURL } from "../api"
-import PlacholderCover from "../placeholder-cover.jpg"
+import { updateAudiobook, deleteAudiobook, coverURL } from "../../api"
+import PlacholderCover from "../../placeholder-cover.jpg"
 
 export default {
 	data() {
@@ -100,7 +100,7 @@ export default {
 			this.$store.dispatch("getAudiobooks")
 			this.$store.dispatch(
 				"getUserUploads",
-				this.$store.state.auth.loggedInUser.id,
+				this.$store.state.auth.loggedIn.id,
 			)
 		},
 		async deleteAudiobook() {
@@ -134,7 +134,7 @@ function routeHandler(to, from, next) {
 </script>
 
 <style lang="less" scoped>
-@import "../globals.less";
+@import "../../globals.less";
 
 .upload-edit {
 	display: flex;

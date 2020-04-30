@@ -10,8 +10,12 @@ import Login from "./components/Login.vue"
 import Main from "./components/Main.vue"
 import Library from "./components/Library.vue"
 import Upload from "./components/Upload"
-import Edit from "./components/Edit.vue"
-import Admin from "./components/Admin.vue"
+import Edit from "./components/Upload/Edit.vue"
+
+import Admin from "./components/Admin"
+import EditUser from "./components/Admin/Edit.vue"
+
+import Settings from "./components/Settings.vue"
 
 import NotFound from "./components/NotFound"
 
@@ -113,6 +117,12 @@ async function main() {
 							component: Admin,
 							beforeEnter: adminGuard,
 						},
+						{
+							path: "/user/:id/edit",
+							component: EditUser,
+							beforeEnter: adminGuard,
+						},
+						{ path: "/settings", component: Settings },
 						{ path: "*", component: NotFound },
 					],
 				},

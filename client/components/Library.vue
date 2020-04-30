@@ -5,6 +5,9 @@
 				v-for="audiobook in audiobooks"
 				@click="play(audiobook)"
 			)
+				.overlay
+					p {{ audiobook.title }}
+					p by {{ audiobook.author }}
 				img(
 					:src="coverURL(audiobook.id)"
 					@error="noImage"

@@ -205,10 +205,11 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 		}
 
 		var data struct {
-			ID       int64   `form:"-" json:"-" db:"id"`
-			Name     *string `form:"name" json:"name" db:"name"`
-			Password *string `form:"password" json:"password" db:"password"`
-			Role     *string `form:"role" json:"role" db:"role"`
+			ID           int64   `form:"-" json:"-" db:"id"`
+			Name         *string `form:"name" json:"name" db:"name"`
+			Password     *string `form:"password" json:"password" db:"password"`
+			Role         *string `form:"role" json:"role" db:"role"`
+			Confirmation *string `form:"confirmation" json:"confirmation" db:"-"`
 		}
 
 		err = ctx.ShouldBind(&data)
@@ -228,6 +229,7 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
+		// Only admins are allowed to update other users
 		claims := getClaims(ctx)
 		isAdmin := claims.isAdmin()
 		if claims.ID != id && !isAdmin {
@@ -246,9 +248,36 @@ func UpdateUser(r *gin.RouterGroup, c *conf.Config) {
 			return
 		}
 
-		//TODO: Add more checks when changing password:
-		// 1: If user is not an admin require reauthentication
-		// 2: If the password of an admin is changed, required reauthentication
+		// If the user is updating their own account they need to supply their
+		// password.
+		if claims.ID == id {
+			if data.Confirmation == nil {
+				ctx.JSON(
+					http.StatusBadRequest,
+					conf.M{"err": "confirmation password missing"},
+				)
+				return
+			}
+
+			u := &User{}
+			err = c.DB.Get(u, c.TemplateString("login"), claims.Name)
+			if err != nil {
+				panic(err)
+			}
+
+			err = bcrypt.CompareHashAndPassword(
+				u.Password,
+				[]byte(*data.Confirmation),
+			)
+			if err != nil {
+				ctx.JSON(
+					http.StatusBadRequest,
+					conf.M{"err": "password do not match"},
+				)
+				return
+			}
+		}
+
 		if data.Password != nil {
 			hash, err := bcrypt.GenerateFromPassword([]byte(*data.Password), bcrypt.DefaultCost)
 			if err != nil {
