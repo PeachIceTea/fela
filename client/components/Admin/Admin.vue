@@ -26,7 +26,7 @@ export default {
 	},
 	beforeRouteEnter(to, from, next) {
 		next(async vm => {
-			vm.$store.dispatch("getAllUsers")
+			await vm.$store.dispatch("getAllUsers")
 		})
 	},
 	methods: {
@@ -60,7 +60,7 @@ export default {
 
 .user {
 	.container();
-	font-size: 20px;
+	font-size: 18px;
 	line-height: 5;
 	padding: 0 1em;
 }

@@ -12,4 +12,6 @@ require (
 	github.com/jmoiron/sqlx v1.2.0
 	golang.org/x/crypto v0.0.0-20200422194213-44a606286825
 	golang.org/x/sync v0.0.0-20200317015054-43a5402ce75a
+	golang.org/x/tools v0.0.0-20200502202811-ed308ab3e770 // indirect
+	google.golang.org/appengine v1.6.6 // indirect
 )

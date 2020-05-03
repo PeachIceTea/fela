@@ -11,7 +11,7 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// ServeFiles - / /file/*path
+// ServeFiles - /file/*path
 func ServeFiles(r *gin.RouterGroup, c *conf.Config) {
 	r.GET("/files/*path", func(ctx *gin.Context) {
 		auth := ctx.Query("auth")
@@ -27,4 +27,16 @@ func ServeFiles(r *gin.RouterGroup, c *conf.Config) {
 		path, _ := filepath.Abs(path.Clean(fmt.Sprintf("%s/%s", c.FilesPath, ctx.Param("path"))))
 		http.ServeFile(ctx.Writer, ctx.Request, path)
 	})
+}
+
+// ServeClient - All non-api routes
+func ServeClient(c *conf.Config) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		ctx.Next()
+		fmt.Println("Hi")
+		if ctx.Writer.Status() == 404 {
+			path, _ := filepath.Abs("client/dist/index.html")
+			http.ServeFile(ctx.Writer, ctx.Request, path)
+		}
+	}
 }

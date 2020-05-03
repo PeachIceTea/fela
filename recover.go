@@ -1,5 +1,6 @@
 // Fork of gin-gonics recovery.go.
-// Adds json body to response.
+// Adds JSON body to the response. This is so clients can always expect a valid
+// JSON body even when the server encounters an unexpected error.
 
 // Copyright 2014 Manu Martinez-Almeida.  All rights reserved.
 // Use of this source code is governed by a MIT style

@@ -19,11 +19,6 @@ import (
 	"github.com/PeachIceTea/fela/conf"
 )
 
-// Declare errors.
-var (
-	ErrNoAudioStream = errors.New("no audio stream")
-)
-
 // File represents a File database row.
 type File struct {
 	ID          int64     `db:"id" json:"id"`
@@ -37,7 +32,7 @@ type File struct {
 	UpdatedAt   *string   `db:"updated_at" json:"updated_at"`
 }
 
-// Upload - POST /user/register - Creates a new audiobook.
+// Upload - POST /audiobook/upload - Creates a new audiobook.
 // Requires the "file" field which has to include 1 or more files.
 func Upload(r *gin.RouterGroup, c *conf.Config) {
 	r.POST("/audiobook/upload", func(ctx *gin.Context) {

@@ -6,11 +6,12 @@
 				:class="{'bar-err': upload.err, 'bar-success': !upload.err && upload.progress === 1}"
 			)
 			.content
-				.message.file-names Uploading {{ upload.files.length }} file
-					span(v-if="upload.files.length !== 1") s
-					| :&#32;
+				details.message.file-names
+					summary Uploading {{ upload.files.length }}
+						span(v-if="upload.files.length === 1")  file
+						span(v-else)  files
 					span(v-for="file, i in upload.files") {{ file.name }}
-						span(v-if="i + 1 !== upload.files.length") ,&#32;
+							span(v-if="i + 1 !== upload.files.length") ,&#32;
 				.message(v-show="!upload.err && upload.progress !== 1")
 					| Progress {{ (upload.progress * 100).toFixed(2) }}%
 				.message(v-if="upload.err") Error: {{ upload.err }}
@@ -82,5 +83,11 @@ export default {
 
 .bar-success {
 	background: @success;
+}
+
+summary {
+	margin: 0.5em 0;
+	cursor: pointer;
+	user-select: none;
 }
 </style>

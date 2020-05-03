@@ -14,10 +14,10 @@ import (
 	"github.com/jmoiron/sqlx"
 )
 
-// M - Map shortcut
+// M is a shortcut for the most often used map type.
 type M map[string]interface{}
 
-// Config - Stores app configuration
+// Config stores app configuration. Expected to created once and handed around.
 type Config struct {
 	DB            *sqlx.DB
 	ConnectionURL string
@@ -26,20 +26,21 @@ type Config struct {
 	Templates     *template.Template
 }
 
-// Init - Initialize the server config
-func Init() (c *Config) {
+// Initialize creates a new Config and runs all neccessary functions to get it
+// up and running. This is the expected way to get a Config.
+func Initialize() (c *Config) {
 	c = &Config{}
 
 	c.LoadEnv()
 	c.EnsureDirectoryStructure()
 
 	c.LoadTemplates()
-	c.ConnectToDatabase()
+	c.ConnectToDB()
 
 	return
 }
 
-// EnsureDirectoryStructure - Ensures that the needed directory structure exists
+// EnsureDirectoryStructure ensures that the needed directory structure exists.
 func (c *Config) EnsureDirectoryStructure() {
 	c.ensureDirectory("")
 	c.ensureDirectory("audio")
@@ -54,8 +55,8 @@ func (c *Config) ensureDirectory(p string) error {
 	return nil
 }
 
-// ConnectToDatabase - Connects to database using the ConnectionURL
-func (c *Config) ConnectToDatabase() {
+// ConnectToDB connects to database using the ConnectionURL.
+func (c *Config) ConnectToDB() {
 	u, err := url.Parse(c.ConnectionURL)
 	if err != nil {
 		log.Panic(err)
@@ -70,7 +71,8 @@ func (c *Config) ConnectToDatabase() {
 	}
 }
 
-// LoadEnv - Loads .env file
+// LoadEnv loads the .env file that should contain most of the configuration of
+// a perticular fela instance.
 func (c *Config) LoadEnv() {
 	f, err := os.Open(".env")
 	if err != nil {
@@ -99,13 +101,12 @@ func (c *Config) LoadEnv() {
 	}
 }
 
-// LoadTemplates - Loads SQL templates
+// LoadTemplates loads SQL templates.
 func (c *Config) LoadTemplates() {
 	c.Templates = template.Must(template.ParseGlob("db/templates/*.sql"))
 }
 
-// TemplateString - Returns given template
-// Panics if template is not found
+// TemplateString returns a given template. Panics if template is not found.
 func (c *Config) TemplateString(name string) string {
 	buf := bytes.Buffer{}
 	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), nil)
@@ -116,8 +117,8 @@ func (c *Config) TemplateString(name string) string {
 	return buf.String()
 }
 
-// TemplateWithData - Returns given template, accepts data to be passed to template
-// Panics if template is not found
+// TemplateWithData returns a given template and accepts data to be passed to
+// template. Panics if template is not found.
 func (c *Config) TemplateWithData(name string, data interface{}) string {
 	buf := bytes.Buffer{}
 	err := c.Templates.ExecuteTemplate(&buf, fmt.Sprintf("%s.sql", name), &data)

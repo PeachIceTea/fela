@@ -88,6 +88,7 @@ export default {
 		uploader() {
 			return this.$store.getters.isUploader
 		},
+
 		coverViewActive() {
 			return this.$store.state.ui.view === 0
 		},
@@ -195,7 +196,7 @@ export default {
 		transition: 500ms all ease;
 
 		&:hover {
-			filter: blur(5px) brightness(0.75);
+			/* filter: blur(5px) brightness(0.75); */
 			transform: scale(1.03);
 		}
 	}
@@ -204,7 +205,7 @@ export default {
 @media (min-width: 1400px) {
 	.cover-library {
 		display: grid;
-		grid-template-columns: repeat(5, 1fr);
+		grid-template-columns: repeat(4, 1fr);
 	}
 }
 </style>

@@ -1,10 +1,14 @@
-// Fela is a audiobook management server
+// The main package creates the gin server and a conf.Config. It hands off
+// creating routes to the api package. It also contains a slightly modified
+// version of the default gin panic middleware.
+
 package main
 
 import (
 	"net/http"
+	"strings"
 
-	"github.com/gin-contrib/cors"
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 
 	"github.com/PeachIceTea/fela/api"
@@ -12,24 +16,21 @@ import (
 )
 
 func main() {
-	c := conf.Init()
+	c := conf.Initialize()
 	r := gin.New()
 
-	r.Use(gin.Logger())
 	r.Use(recoverMiddleware())
+	r.Use(static.Serve("/", static.LocalFile("./client/dist", false)))
 	r.NoRoute(func(ctx *gin.Context) {
-		ctx.JSON(http.StatusNotFound, gin.H{"error": "page not found"})
-	})
+		if strings.HasPrefix(ctx.Request.URL.Path, "/api") {
+			ctx.JSON(http.StatusNotFound, gin.H{"error": "route not found"})
+			return
+		}
 
-	corsConfig := cors.DefaultConfig()
-	corsConfig.AllowOrigins = []string{"http://localhost:1234"}
-	corsConfig.AllowHeaders = []string{"content-type", "authorization"}
-	r.Use(cors.New(corsConfig))
-
-	r.GET("/", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{"msg": "Hello, World!"})
+		http.ServeFile(ctx.Writer, ctx.Request, "./client/dist/index.html")
 	})
 
 	api.RegisterRoutes(r.Group("/"), c)
+
 	r.Run()
 }

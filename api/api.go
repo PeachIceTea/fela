@@ -1,3 +1,5 @@
+//
+
 package api
 
 import (
@@ -17,6 +19,7 @@ import (
 var (
 	ErrIDParamMissing = errors.New("id parameter is missing")
 	ErrInvalidID      = errors.New("invalid id")
+	ErrNoAudioStream  = errors.New("no audio stream")
 )
 
 // RegisterRoutes registers /v1 routes
