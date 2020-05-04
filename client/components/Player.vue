@@ -222,10 +222,24 @@ export default {
 			}
 		},
 		rewind() {
-			if (!this.chapter) this.$refs.audio.currentTime = this.time - 30
+			let newTime = this.time - 30
+			if (!this.chapterized) {
+				const startTime = parseFloat(this.chapterObj.start_time)
+				if (startTime > newTime) {
+					newTime = startTime
+				}
+			}
+			this.$refs.audio.currentTime = newTime
 		},
 		forward() {
-			this.$refs.audio.currentTime = this.time + 30
+			let newTime = this.time + 30
+			if (!this.chapterized) {
+				const endTime = parseFloat(this.chapterObj.end_time)
+				if (newTime > endTime) {
+					newTime = endTime
+				}
+			}
+			this.$refs.audio.currentTime = newTime
 		},
 		previousChapter() {
 			if (this.chapterized) {
@@ -272,9 +286,15 @@ export default {
 		// Handles click events on the progressbar
 		handleSeekClick(e) {
 			const bounds = this.$refs.progressBar.getBoundingClientRect()
-			this.seek(
-				(this.chapterDuration * (e.clientX - bounds.x)) / bounds.width,
-			)
+			const newChapterTime =
+				(this.chapterDuration * (e.clientX - bounds.x)) / bounds.width
+			if (this.chapterized) {
+				this.seek(newChapterTime)
+			} else {
+				this.seek(
+					newChapterTime + parseFloat(this.chapterObj.start_time),
+				)
+			}
 		},
 		seek(to) {
 			this.$refs.audio.currentTime = to

@@ -3,8 +3,8 @@
 		h1 404 - Not Found
 		.quote
 			p.
-				#[b Alice:] “Would you tell me, please, which way I ought to go from
-				here?”
+				#[b Alice:] “Would you tell me, please, which way I ought to go
+				from here?”
 			p.
 				#[b The Cheshire Cat:] “That depends a good deal on where you
 				want to	get to.”
@@ -19,7 +19,3 @@
 			p
 			p — Lewis Carroll, Alice's Adventures in Wonderland
 </template>
-
-<style lang="less" scoped>
-@import "../globals.less";
-</style>
