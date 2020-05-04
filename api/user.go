@@ -312,7 +312,7 @@ func DeleteUser(r *gin.RouterGroup, c *conf.Config) {
 		}
 
 		claims := getClaims(ctx)
-		if claims.ID != id && claims.isAdmin() {
+		if !claims.isAdmin() {
 			ctx.JSON(
 				http.StatusUnauthorized,
 				conf.M{"err": "no permission to delete other users"},

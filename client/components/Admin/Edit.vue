@@ -39,14 +39,14 @@
 				input(type="submit" :value="isNewUser ? 'Create' : 'Update'")
 
 			.input-row(v-if="!isNewUser")
-				button(@click.prevent="deleteAudiobook")
+				button(@click.prevent="deleteUser")
 					span(v-if="!deleting") Delete User
 					span(v-else) Are you sure?
 			.message(v-show="err") Error: {{ err }}
 		</template>
 
 <script>
-import { register, updateUser } from "../../api"
+import { register, updateUser, deleteUser } from "../../api"
 
 export default {
 	data() {
@@ -95,6 +95,21 @@ export default {
 					this.err = res.err
 					return
 				}
+			}
+			this.$store.dispatch("getAllUsers")
+			this.$router.push("/admin")
+		},
+		async deleteUser() {
+			if (!this.deleting) {
+				this.deleting = setTimeout(() => (this.deleting = 0), 2000)
+				return
+			}
+
+			clearTimeout(this.deleting)
+			const res = await deleteUser(this.user.id)
+			console.log(res)
+			if (res.err) {
+				this.err = res.err
 			}
 			this.$store.dispatch("getAllUsers")
 			this.$router.push("/admin")
