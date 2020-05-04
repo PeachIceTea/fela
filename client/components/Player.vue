@@ -18,7 +18,15 @@
 				.book-info(style="display: inline")
 					p {{ audiobook.title }}
 					p by {{ audiobook.author }}
-				.chapter(@click="toggleChapterList") {{ chapterName }}
+				.chapter-container(v-if="hasChapterMarkers")
+					.chapter(@click="openChapterList") {{ chapterName }}
+					.chapter-list(v-show="chapterList" ref="chapterList")
+						.chapter-item(
+							v-for="_, i in chapters"
+							:class="{'active-chapter': i === chapter}"
+							@click="chapterClick(i)"
+						)
+							| {{ getChapterName(i) }}
 			.col.middle
 				.timer
 					| {{ chapterTime | duration }} /
@@ -36,7 +44,17 @@
 					.control(@click="nextChapter")
 						Next.control-symbol
 			.col
-				.volume(@click="handleVolumeClick" ref="volume")
+				.col.rate-selector-container
+					.rate(@click="openRateSelect")
+						| {{ playbackRate.toFixed(2) }}x
+					.rate-selector(v-show="rateSelector" ref="rateSelector")
+						.rate-item(
+							v-for="rate in [2, 1.75, 1.5, 1.25, 1, 0.75, 0.5]"
+							@click="rateClick(rate)"
+							:class="{'active-rate': rate === playbackRate}"
+						)
+							| {{ rate.toFixed(2) }}x
+				.volume(@mousedown="handleVolumeChange" ref="volume")
 					.volume-slider(:style="{width:`${volume*100}%`}")
 
 		.seek-info(
@@ -66,12 +84,14 @@ export default {
 			volume: 1,
 			time: 0,
 			paused: false,
+			playbackRate: 1.0,
 			seekInfo: {
 				show: false,
 				value: 0,
 				x: 0,
 			},
 			chapterList: false,
+			rateSelector: false,
 		}
 	},
 	computed: {
@@ -95,6 +115,27 @@ export default {
 			}
 		},
 
+		// Checks if we have multiple files or not.
+		chapterized() {
+			if (this.file) {
+				return this.audiobook.files.length > 1
+			} else {
+				return false
+			}
+		},
+
+		// Indicates if the audiobook has markers for chapters
+		hasChapterMarkers() {
+			if (this.audiobook.files) {
+				if (this.chapterized) {
+					return true
+				} else {
+					console.log(this.audiobook.title, this.chapters.length)
+					return !!this.chapters.length
+				}
+			}
+		},
+
 		// Returns array of chapters. The objects differ between chapterized
 		// and single file audiobooks
 		chapters() {
@@ -104,15 +145,6 @@ export default {
 				} else {
 					return this.audiobook.files[0].metadata.chapters
 				}
-			}
-		},
-
-		// Checks if we have multiple files or not.
-		chapterized() {
-			if (this.file) {
-				return this.audiobook.files.length > 1
-			} else {
-				return false
 			}
 		},
 
@@ -149,7 +181,7 @@ export default {
 		// Duration of the current chapter
 		chapterDuration() {
 			if (this.file) {
-				if (this.chapterized) {
+				if (this.chapterized || !this.hasChapterMarkers) {
 					return this.file.duration
 				} else {
 					const chapter = this.chapters[this.chapter]
@@ -164,10 +196,9 @@ export default {
 		// Position in current chapter
 		chapterTime() {
 			if (this.file) {
-				if (this.chapterized) {
+				if (this.chapterized || !this.hasChapterMarkers) {
 					return this.time
 				} else {
-					console
 					return this.time - parseFloat(this.chapterObj.start_time)
 				}
 			}
@@ -242,22 +273,16 @@ export default {
 			this.$refs.audio.currentTime = newTime
 		},
 		previousChapter() {
-			if (this.chapterized) {
-				this.fileIndex--
-			} else {
-				const nextChapter = this.chapters[this.chapter - 1]
-				if (nextChapter) {
-					this.$refs.audio.currentTime = parseFloat(
-						nextChapter.start_time,
-					)
-				}
-			}
+			this.goToChapter(this.chapter - 1)
 		},
 		nextChapter() {
+			this.goToChapter(this.chapter + 1)
+		},
+		goToChapter(i) {
 			if (this.chapterized) {
-				this.fileIndex++
+				this.fileIndex = i
 			} else {
-				const nextChapter = this.chapters[this.chapter + 1]
+				const nextChapter = this.chapters[i]
 				if (nextChapter) {
 					this.$refs.audio.currentTime = parseFloat(
 						nextChapter.start_time,
@@ -277,9 +302,28 @@ export default {
 			this.$refs.audio.volume = vol
 			this.volume = vol
 		},
-		handleVolumeClick(e) {
-			const bounds = this.$refs.volume.getBoundingClientRect()
-			this.setVolume((e.clientX - bounds.x) / bounds.width)
+		setPlaybackRate(rate) {
+			this.playbackRate = rate
+			this.$refs.audio.playbackRate = rate
+		},
+
+		handleVolumeChange(e) {
+			const volume = this.$refs.volume
+			const bounds = volume.getBoundingClientRect()
+
+			const setVolume = e => {
+				this.setVolume(
+					Math.max(0, (e.clientX - bounds.x) / bounds.width),
+				)
+			}
+			const removeListener = () => {
+				document.removeEventListener("mousemove", setVolume)
+				document.removeEventListener("mouseup", removeListener)
+			}
+
+			document.addEventListener("mousemove", setVolume)
+			document.addEventListener("mouseup", removeListener)
+			setVolume(e)
 		},
 
 		// Seek info functions
@@ -359,17 +403,70 @@ export default {
 				// it is not save to assume that we have any chapter
 				// information.
 				const chapterObj = this.chapters[i]
-				if (chapterObj && chapterObj.tags && chapterObj.tags.title) {
-					return chapterObj.tags.title
+				if (chapterObj && chapterObj.tags) {
+					if (chapterObj.tags.title) {
+						return chapterObj.tags.title
+					} else {
+						return `Chapter ${i + 1}`
+					}
 				}
 			}
 		},
 
 		// Chapterlist
-		toggleChapterList() {
-			if (!this.chapterList) {
+		openChapterList() {
+			this.chapterList = true
+			setTimeout(() => {
+				const offset = this.$refs.chapterList.getElementsByClassName(
+					"active-chapter",
+				)[0].offsetTop
+				this.$refs.chapterList.scrollTop = offset
+			}, 10)
+			setTimeout(() => {
+				document.body.addEventListener("click", this.closeChapterList)
+			}, 150)
+		},
+
+		chapterClick(i) {
+			this.goToChapter(i)
+			this.chapterList = false
+
+			// Fixes issue where clicks are fired from the incorrect element
+			// making it impossible to open the chapter list after changing
+			// the chapter once.
+			document.body.click()
+		},
+		closeChapterList(e) {
+			if (!this.$refs.chapterList.contains(e.target)) {
+				this.chapterList = false
+				document.body.removeEventListener(
+					"click",
+					this.closeChapterList,
+				)
 			}
-			this.chapterList = !this.chapterList
+		},
+
+		// Rate select
+		openRateSelect() {
+			this.rateSelector = true
+			setTimeout(() => {
+				document.body.addEventListener("click", this.closeRateSelect)
+			}, 150)
+		},
+		rateClick(rate) {
+			this.setPlaybackRate(rate)
+			this.rateSelector = false
+
+			// Fixes issue where clicks are fired from the incorrect element
+			// making it impossible to open the chapter list after changing
+			// the chapter once.
+			document.body.click()
+		},
+		closeRateSelect(e) {
+			if (!this.$refs.rateSelector.contains(e.target)) {
+				this.rateSelector = false
+				document.body.removeEventListener("click", this.closeRateSelect)
+			}
 		},
 
 		// Makes the coverURL and fileURL api functions accessible within the
@@ -411,6 +508,8 @@ export default {
 
 <style lang="less" scoped>
 @import "../globals.less";
+
+@scrollbar-background: darken(@background, 5%);
 
 .player {
 	width: 100%;
@@ -522,8 +621,54 @@ img {
 	text-shadow: 2px 2px 3px rgba(0, 0, 0, 1);
 }
 
-.chapter {
+.chapter-container {
 	flex: 1;
+	cursor: pointer;
+	position: relative;
+}
+
+.chapter {
+	border: 1px solid lighten(@background, 2%);
+	padding: 1em;
+	border-radius: @border-radius;
+	cursor: pointer;
+}
+
+.chapter-list {
+	position: absolute;
+	bottom: 100%;
+	z-index: 1;
+	margin-bottom: 5px;
+	width: 100%;
+	height: 15em;
+	overflow-y: scroll;
+	background: @background;
+	scrollbar-color: @highlight @scrollbar-background;
+	border-radius: 5px;
+	.boxShadow();
+}
+
+.active-chapter {
+	background: lighten(@background, 10%) !important;
+}
+
+.chapter-list::-webkit-scrollbar {
+	background: @scrollbar-background;
+}
+
+.chapter-list::-webkit-scrollbar-track {
+	background: @scrollbar-background;
+}
+
+.chapter-list::-webkit-scrollbar-thumb {
+	background: @highlight;
+}
+
+.chapter-item {
+	padding: 1em;
+	&:hover {
+		background: lighten(@background, 5%);
+	}
 }
 
 .volume {
@@ -540,5 +685,40 @@ img {
 	border-radius: 6px;
 	width: 0;
 	transition: 250ms all ease;
+}
+
+.rate-selector-container {
+	text-align: center;
+	cursor: pointer;
+	position: relative;
+}
+
+.rate {
+	border: 1px solid lighten(@background, 2%);
+	padding: 1em;
+	border-radius: @border-radius;
+	cursor: pointer;
+}
+
+.rate-selector {
+	position: absolute;
+	bottom: 100%;
+	z-index: 1;
+	margin-bottom: 5px;
+	background: @background;
+	border-radius: 5px;
+	.boxShadow();
+}
+
+.rate-item {
+	padding: 1em;
+
+	&:hover {
+		background: lighten(@background, 5%);
+	}
+}
+
+.active-rate {
+	background: lighten(@background, 10%) !important;
 }
 </style>
