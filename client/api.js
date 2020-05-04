@@ -180,17 +180,17 @@ export async function api(route, config) {
 }
 
 export function apiURL(route) {
-	return `http://localhost:8080/api/v1${route}`
+	return `/api/v1${route}`
 }
 
 // Fileurl
 export function audiobookURL(id, filename) {
 	const token = encodeURIComponent(store.state.auth.token)
 	name = encodeURIComponent(name)
-	return `http://localhost:8080/files/audio/${id}/${filename}?auth=${token}`
+	return `/files/audio/${id}/${filename}?auth=${token}`
 }
 
 export function coverURL(id) {
 	const token = encodeURIComponent(store.state.auth.token)
-	return `http://localhost:8080/files/cover/${id}.jpg?auth=${token}`
+	return `/files/cover/${id}.jpg?auth=${token}`
 }
