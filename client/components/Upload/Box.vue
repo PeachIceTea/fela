@@ -26,7 +26,6 @@ export default {
 			this.fileHovering = false
 			const files = e.dataTransfer.files
 			if (files) {
-				console.log(1, files)
 				for (let i = 0, len = files.length; i < len; i++) {
 					// Not all files are assigned a mime. As an example Firefox does
 					// not assign one for ".m4b"s. We will just have to assume the
@@ -41,7 +40,6 @@ export default {
 						return
 					}
 				}
-				console.log(2, files)
 				this.handleFiles(files)
 			}
 		},
@@ -57,7 +55,6 @@ export default {
 			e.srcElement.value = ""
 		},
 		async handleFiles(arr) {
-			console.log(3, arr)
 			// A file input element has only a single FileList which is reused
 			// when needed. To keep references to the files we need to create a
 			// new array. Additionally this gives us access to array functions

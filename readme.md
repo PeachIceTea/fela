@@ -3,8 +3,10 @@
 # Install
 
 1. Install [Go](https://golang.org/), [Node.js](https://nodejs.org/en/),
-   [MariaDB](https://mariadb.com/) and
-   [dbmate](https://github.com/amacneil/dbmate).
+   [Yarn](https://yarnpkg.com/),
+   [MariaDB](https://mariadb.com/),
+   [ffmpeg](https://ffmpeg.org/) and
+   [Dbmate](https://github.com/amacneil/dbmate).
 2. Create a new database user and database and adjust the `.env` file.
 3. Run `dbmate up` to run the migrations.
 

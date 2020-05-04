@@ -36,7 +36,7 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 		GetUsers(protected, c)
 		GetUser(protected, c)
 		UpdateUser(protected, c)
-		Register(v1, c) //TODO: Proper setup story
+		Register(protected, c)
 		DeleteUser(protected, c)
 
 		GetAudiobooks(protected, c)

@@ -28,15 +28,3 @@ func ServeFiles(r *gin.RouterGroup, c *conf.Config) {
 		http.ServeFile(ctx.Writer, ctx.Request, path)
 	})
 }
-
-// ServeClient - All non-api routes
-func ServeClient(c *conf.Config) gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		ctx.Next()
-		fmt.Println("Hi")
-		if ctx.Writer.Status() == 404 {
-			path, _ := filepath.Abs("client/dist/index.html")
-			http.ServeFile(ctx.Writer, ctx.Request, path)
-		}
-	}
-}

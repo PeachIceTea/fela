@@ -113,7 +113,7 @@ func UpdateAudiobook(r *gin.RouterGroup, c *conf.Config) {
 			ID     int64                    `form:"-" json:"-" db:"id"`
 			Title  *string                  `form:"title" json:"title"`
 			Author *string                  `form:"author" json:"author"`
-			Cover  *[]*multipart.FileHeader `form:"cover"`
+			Cover  *[]*multipart.FileHeader `form:"cover" json:"-"`
 		}
 
 		err = ctx.ShouldBind(&data)
