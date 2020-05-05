@@ -33,7 +33,7 @@
 					| {{ chapterDuration | duration }}
 				.controls
 					.control(@click="previousChapter")
-						Previous.control-symbol
+						Previous.control-symbol(v-if="hasChapterMarkers")
 					.control(@click="rewind")
 						Rewind.control-symbol
 					.control(@click="toggle")
@@ -42,7 +42,7 @@
 					.control(@click="forward")
 						FastForward.control-symbol
 					.control(@click="nextChapter")
-						Next.control-symbol
+						Next.control-symbol(v-if="hasChapterMarkers")
 			.col
 				.col.rate-selector-container
 					.rate(@click="openRateSelect")
@@ -77,22 +77,24 @@ import Rewind from "./svg/Rewind.vue"
 import Next from "./svg/Next"
 import Previous from "./svg/Previous"
 
+const initialState = {
+	fileIndex: 0,
+	volume: 1,
+	time: 0,
+	paused: false,
+	playbackRate: 1.0,
+	seekInfo: {
+		show: false,
+		value: 0,
+		x: 0,
+	},
+	chapterList: false,
+	rateSelector: false,
+}
+
 export default {
 	data() {
-		return {
-			fileIndex: 0,
-			volume: 1,
-			time: 0,
-			paused: false,
-			playbackRate: 1.0,
-			seekInfo: {
-				show: false,
-				value: 0,
-				x: 0,
-			},
-			chapterList: false,
-			rateSelector: false,
-		}
+		return { ...initialState }
 	},
 	computed: {
 		// Get the audiobook to be played from the store.
@@ -131,7 +133,7 @@ export default {
 					return true
 				} else {
 					console.log(this.audiobook.title, this.chapters.length)
-					return !!this.chapters.length
+					return !!this.chapters && !!this.chapters.length
 				}
 			}
 		},
@@ -151,7 +153,7 @@ export default {
 		// Current chapter number
 		chapter() {
 			if (this.file) {
-				if (this.chapterized) {
+				if (this.chapterized || !this.hasChapterMarkers) {
 					return this.fileIndex
 				} else {
 					for (let i = 0, len = this.chapters.length; i < len; i++) {
@@ -254,7 +256,7 @@ export default {
 		},
 		rewind() {
 			let newTime = this.time - 30
-			if (!this.chapterized) {
+			if (!this.chapterized && this.hasChapterMarkers) {
 				const startTime = parseFloat(this.chapterObj.start_time)
 				if (startTime > newTime) {
 					newTime = startTime
@@ -264,7 +266,7 @@ export default {
 		},
 		forward() {
 			let newTime = this.time + 30
-			if (!this.chapterized) {
+			if (!this.chapterized && this.hasChapterMarkers) {
 				const endTime = parseFloat(this.chapterObj.end_time)
 				if (newTime > endTime) {
 					newTime = endTime
@@ -332,7 +334,7 @@ export default {
 			const bounds = this.$refs.progressBar.getBoundingClientRect()
 			const newChapterTime =
 				(this.chapterDuration * (e.clientX - bounds.x)) / bounds.width
-			if (this.chapterized) {
+			if (this.chapterized || !this.hasChapterMarkers) {
 				this.seek(newChapterTime)
 			} else {
 				this.seek(
@@ -394,7 +396,7 @@ export default {
 				if (firstTitle && firstTitle !== nextTitle) {
 					return this.chapters[i].metadata.format.tags.title
 				} else {
-					return `Chapter ${this.chapter + 1}`
+					return `Chapter ${i + 1}`
 				}
 			} else {
 				// The only way with a single file audiobook to know the
@@ -477,6 +479,12 @@ export default {
 		// fetched.
 		noImage(e) {
 			e.srcElement.src = PlacholderCover
+		},
+	},
+
+	watch: {
+		audiobook() {
+			Object.assign(this.state, initialState)
 		},
 	},
 

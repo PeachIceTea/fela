@@ -332,7 +332,7 @@ func DeleteUser(r *gin.RouterGroup, c *conf.Config) {
 			panic(err)
 		}
 
-		_, err = c.DB.Exec(c.TemplateString("delete_user"), id)
+		_, err = tx.Exec(c.TemplateString("delete_user"), id)
 		if err != nil {
 			tx.Rollback()
 			panic(err)

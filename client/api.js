@@ -192,5 +192,8 @@ export function audiobookURL(id, filename) {
 
 export function coverURL(id) {
 	const token = encodeURIComponent(store.state.auth.token)
-	return `/files/cover/${id}.jpg?auth=${token}`
+	return `/files/cover/${id}.jpg?auth=${token}&r=${Math.random()
+		.toString(36)
+		.replace(/[^a-z]+/g, "")
+		.substr(0, 5)}`
 }
