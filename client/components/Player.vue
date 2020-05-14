@@ -432,11 +432,7 @@ export default {
 		chapterClick(i) {
 			this.goToChapter(i)
 			this.chapterList = false
-
-			// Fixes issue where clicks are fired from the incorrect element
-			// making it impossible to open the chapter list after changing
-			// the chapter once.
-			document.body.click()
+			document.body.removeEventListener("click", this.closeChapterList)
 		},
 		closeChapterList(e) {
 			if (!this.$refs.chapterList.contains(e.target)) {
@@ -450,19 +446,20 @@ export default {
 
 		// Rate select
 		openRateSelect() {
-			this.rateSelector = true
-			setTimeout(() => {
-				document.body.addEventListener("click", this.closeRateSelect)
-			}, 150)
+			if (!this.rateSelector) {
+				this.rateSelector = true
+				setTimeout(() => {
+					document.body.addEventListener(
+						"click",
+						this.closeRateSelect,
+					)
+				}, 150)
+			}
 		},
 		rateClick(rate) {
 			this.setPlaybackRate(rate)
 			this.rateSelector = false
-
-			// Fixes issue where clicks are fired from the incorrect element
-			// making it impossible to open the chapter list after changing
-			// the chapter once.
-			document.body.click()
+			document.body.removeEventListener("click", this.closeRateSelect)
 		},
 		closeRateSelect(e) {
 			if (!this.$refs.rateSelector.contains(e.target)) {
@@ -471,7 +468,7 @@ export default {
 			}
 		},
 
-		// Makes the coverURL and fileURL api functions accessible within the
+		// Makes the coverURL api functions accessible within the
 		// template.
 		coverURL,
 
@@ -727,5 +724,30 @@ img {
 
 .active-rate {
 	background: lighten(@background, 10%) !important;
+}
+
+@media (max-width: 480px) {
+	.cover {
+		display: none;
+	}
+
+	.content {
+		flex-direction: column;
+	}
+
+	.volume {
+		display: none;
+	}
+
+	.content {
+		> .col:not(:last-child) {
+			margin-bottom: 1em;
+		}
+	}
+
+	.book-info {
+		font-size: 16px;
+		text-align: center;
+	}
 }
 </style>

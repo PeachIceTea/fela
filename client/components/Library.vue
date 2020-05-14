@@ -11,7 +11,7 @@
 				)
 		.list-library(v-show="!coverViewActive")
 			.container.item(v-for="audiobook in audiobooks")
-				.small-cover
+				.small-cover(@click="play(audiobook)")
 					img(
 						:src="coverURL(audiobook.id)"
 						@error="noImage"
@@ -153,14 +153,14 @@ export default {
 	display: flex;
 	justify-content: flex-end;
 	align-items: center;
+}
 
-	button {
-		height: 5em;
-		width: 8em;
+button {
+	height: 5em;
+	width: 8em;
 
-		&:last-child {
-			margin-left: 1em;
-		}
+	&:last-child {
+		margin-left: 1em;
 	}
 }
 
@@ -200,8 +200,35 @@ export default {
 
 @media (min-width: 1400px) {
 	.cover-library {
-		display: grid;
 		grid-template-columns: repeat(4, 1fr);
+	}
+}
+
+@media (max-width: 480px) {
+	.cover-library {
+		display: grid;
+		grid-template-columns: repeat(1, 1fr);
+	}
+
+	.buttons {
+		display: none;
+	}
+
+	.small-cover {
+		flex: 1;
+	}
+
+	.text {
+		flex: 1;
+	}
+
+	.title {
+		font-size: 15px;
+	}
+
+	.item {
+		height: 10em;
+		padding: 0.5em;
 	}
 }
 </style>

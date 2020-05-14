@@ -1,6 +1,9 @@
 <template lang="pug">
 	.app
-		nav
+		.menu-btn(@click="toggleNav")
+			Menu(v-show="!showNav")
+			Cancel(v-show="showNav")
+		nav(:class="{show: showNav}")
 			Navbar
 		main
 			router-view
@@ -9,11 +12,29 @@
 </template>
 
 <script>
+import Menu from "./svg/Menu.vue"
+import Cancel from "./svg/Cancel"
+
 import Navbar from "./Navbar.vue"
 import Player from "./Player.vue"
 
 export default {
-	components: { Navbar, Player },
+	data() {
+		return {
+			showNav: false,
+		}
+	},
+	methods: {
+		toggleNav() {
+			this.showNav = !this.showNav
+		},
+	},
+	watch: {
+		$route() {
+			this.showNav = false
+		},
+	},
+	components: { Navbar, Player, Menu, Cancel },
 }
 </script>
 
@@ -77,6 +98,46 @@ footer {
 		-webkit-box-orient: vertical;
 
 		-webkit-box-direction: normal;
+	}
+}
+
+.menu-btn {
+	display: none;
+}
+
+@media (max-width: 480px) {
+	nav {
+		display: none;
+
+		&.show {
+			display: block !important;
+			position: absolute;
+			width: 100vw;
+			height: 100vh;
+			z-index: 10;
+			box-shadow: 100px 0px 200px 10px #000;
+		}
+	}
+
+	.menu-btn {
+		display: flex;
+		position: absolute;
+		z-index: 100;
+		top: 10px;
+		right: 10px;
+		fill: @offwhite;
+		font-size: 2em;
+		width: 1.5em;
+		background: @highlight;
+		justify-items: center;
+		box-shadow: @box-shadow;
+		border-radius: @border-radius;
+		cursor: pointer;
+
+		svg {
+			width: 100%;
+			height: 1.5em;
+		}
 	}
 }
 </style>
