@@ -368,7 +368,7 @@ img {
 	max-width: inherit;
 	border-radius: @border-radius;
 
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 .controls {

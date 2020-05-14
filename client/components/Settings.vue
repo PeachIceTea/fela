@@ -1,5 +1,5 @@
 <template lang="pug">
-	.settings
+	.container.settings
 		h1 Settings
 		form(@submit.prevent="updatePassword")
 			h2 Change password
@@ -84,8 +84,6 @@ export default {
 
 .settings {
 	margin: 1em;
-
-	.container();
 }
 
 .input-row {
@@ -101,23 +99,5 @@ button {
 	max-width: 700px;
 	border-radius: @border-radius;
 	font-size: 20px;
-}
-
-.message {
-	.container();
-
-	background: @offwhite;
-	color: @black-text;
-	padding-top: calc(1em - 4px);
-	border-top: 8px solid transparent;
-	max-width: 700px;
-}
-
-.err {
-	border-top-color: @err;
-}
-
-.success {
-	border-top-color: @success;
 }
 </style>

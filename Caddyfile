@@ -1,0 +1,13 @@
+localhost:8765 {
+	route /api/* {
+		reverse_proxy localhost:8080
+	}
+
+	route /files/* {
+		reverse_proxy localhost:8080
+	}
+
+	route * {
+		reverse_proxy localhost:1234
+	}
+}

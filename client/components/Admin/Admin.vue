@@ -6,7 +6,7 @@
 			.column Created
 			.column Last Updated
 			.column Edit
-		.row.user(v-for="user in users")
+		.container.row.user(v-for="user in users")
 			.column {{ user.name | title}}
 			.column {{ user.role | title }}
 			.column {{ user.created_at }}
@@ -59,7 +59,6 @@ export default {
 }
 
 .user {
-	.container();
 	font-size: 18px;
 	line-height: 5;
 	padding: 0 1em;

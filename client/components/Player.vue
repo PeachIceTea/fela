@@ -484,7 +484,7 @@ export default {
 
 	watch: {
 		audiobook() {
-			Object.assign(this.state, initialState)
+			Object.assign(this, initialState)
 		},
 	},
 
@@ -589,8 +589,7 @@ img {
 	max-height: inherit;
 	max-width: inherit;
 	border-radius: @border-radius;
-
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 .controls {
@@ -653,7 +652,7 @@ img {
 	background: @background;
 	scrollbar-color: @highlight @scrollbar-background;
 	border-radius: 5px;
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 .active-chapter {
@@ -715,7 +714,7 @@ img {
 	margin-bottom: 5px;
 	background: @background;
 	border-radius: 5px;
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 .rate-item {

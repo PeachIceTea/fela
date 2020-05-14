@@ -11,7 +11,7 @@
 			)
 			input.button(type="submit" value="Login" ref="btn")
 
-			.err(v-show="err") Error: {{ err }}
+			.message.err(v-show="err") Error: {{ err }}
 </template>
 
 <script>
@@ -94,8 +94,7 @@ h1 {
 form {
 	width: 250px;
 	margin-top: 25px;
-
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 input {
@@ -120,8 +119,6 @@ input[type="submit"] {
 }
 
 .err {
-	.container();
-
 	border-top: 5px solid @err;
 	margin-top: 1em;
 	width: 100%;

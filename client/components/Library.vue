@@ -10,7 +10,7 @@
 					@error="noImage"
 				)
 		.list-library(v-show="!coverViewActive")
-			.item(v-for="audiobook in audiobooks")
+			.container.item(v-for="audiobook in audiobooks")
 				.small-cover
 					img(
 						:src="coverURL(audiobook.id)"
@@ -124,7 +124,6 @@ export default {
 }
 
 .item {
-	.container();
 	margin-bottom: 1em;
 	display: flex;
 	height: 15em;

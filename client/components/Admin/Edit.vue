@@ -1,5 +1,5 @@
 <template lang="pug">
-	.edit-user
+	.container.edit-user
 		form(@submit.prevent="submit")
 			h1(v-if="!isNewUser") Edit User
 			h1(v-else) New User
@@ -42,7 +42,7 @@
 				button(@click.prevent="deleteUser")
 					span(v-if="!deleting") Delete User
 					span(v-else) Are you sure?
-			.message(v-show="err") Error: {{ err }}
+			.message.err(v-show="err") Error: {{ err }}
 		</template>
 
 <script>
@@ -136,8 +136,6 @@ function routeHandler(to, from, next) {
 
 .edit-user {
 	margin: 1em;
-
-	.container();
 }
 
 .input-row {
@@ -153,16 +151,5 @@ button {
 	max-width: 700px;
 	border-radius: @border-radius;
 	font-size: 20px;
-}
-
-.message {
-	.container();
-
-	background: @offwhite;
-	color: @black-text;
-	padding-top: calc(1em - 4px);
-	border-top: 8px solid transparent;
-	max-width: 700px;
-	border-top-color: @err;
 }
 </style>

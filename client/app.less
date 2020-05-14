@@ -56,6 +56,30 @@ input[type="submit"] {
 	}
 
 	&:active {
-		.boxShadow();
+		box-shadow: @box-shadow;
 	}
+}
+
+.container {
+	background: lighten(@background, 10%);
+	border-radius: @border-radius;
+	padding: 1em;
+	box-shadow: @box-shadow;
+}
+
+.message {
+	.container();
+	background: @offwhite;
+	color: @black-text;
+	padding-top: calc(1em - 4px);
+	border-top: 8px solid transparent;
+	max-width: 700px;
+}
+
+.err {
+	border-top-color: @err;
+}
+
+.success {
+	border-top-color: @success;
 }

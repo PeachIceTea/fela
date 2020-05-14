@@ -1,6 +1,6 @@
 <template lang="pug">
 	.upload-status
-		.upload(v-for="upload, i in uploads")
+		.container.upload(v-for="upload, i in uploads")
 			.progress-bar(
 				:style="{width: `${upload.progress * 100}%`}"
 				:class="{'bar-err': upload.err, 'bar-success': !upload.err && upload.progress === 1}"
@@ -38,7 +38,6 @@ export default {
 @import "../../globals.less";
 
 .upload {
-	.container();
 	padding: 0;
 	margin-bottom: 1em;
 }
@@ -54,27 +53,12 @@ export default {
 }
 
 .file-names {
-	white-space: nowrap;
-	overflow: hidden;
-	text-overflow: ellipsis;
 	margin: 0.5em 0 1em;
 }
 
 .message {
-	.container();
-
-	background: @offwhite;
-	color: @black-text;
-	padding-top: calc(1em - 4px);
-	border-top: 8px solid transparent;
-}
-
-.err {
-	border-top-color: @err;
-}
-
-.success {
-	border-top-color: @success;
+	width: 100% !important;
+	max-width: none;
 }
 
 .bar-err {

@@ -1,5 +1,5 @@
 <template lang="pug">
-	.upload-edit
+	.container.upload-edit
 		form(@submit.prevent="submit")
 			h2 Edit book \#{{ id }}
 			.input-row
@@ -140,7 +140,6 @@ function routeHandler(to, from, next) {
 	display: flex;
 	justify-content: center;
 	margin: 1em;
-	.container();
 }
 form {
 	flex: 1;
@@ -155,7 +154,7 @@ form {
 img {
 	height: 500px;
 	border-radius: @border-radius;
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 h2 {
@@ -178,7 +177,7 @@ input,
 
 input[type="text"],
 .file-input {
-	.boxShadow();
+	box-shadow: @box-shadow;
 }
 
 button {
@@ -190,23 +189,6 @@ button {
 	background: @offwhite;
 	color: @black-text;
 	cursor: pointer;
-}
-
-.message {
-	.container();
-
-	background: @offwhite;
-	color: @black-text;
-	padding-top: calc(1em - 4px);
-	border-top: 8px solid transparent;
-}
-
-.err {
-	border-top-color: @err;
-}
-
-.success {
-	border-top-color: @success;
 }
 
 .bar-err {
