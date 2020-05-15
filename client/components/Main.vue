@@ -66,7 +66,6 @@ nav {
 main {
 	grid-area: main-content;
 	width: 100%;
-	height: 100%;
 	position: relative;
 	overflow-y: scroll;
 	overflow-x: hidden;
@@ -138,6 +137,10 @@ footer {
 			width: 100%;
 			height: 1.5em;
 		}
+	}
+
+	main {
+		-webkit-overflow-scrolling: touch;
 	}
 }
 </style>
