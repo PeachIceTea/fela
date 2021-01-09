@@ -11,9 +11,14 @@
 			v-if="uploader"
 			:class="{active: isActive('/audiobook/upload')}"
 		) Upload
-		router-link.nav-el(to="/admin" v-if="admin") Admin
+		router-link.nav-el(
+			to="/admin"
+			v-if="admin" 
+			:class="{active: isActive('/admin')}") Admin
 		.nav-el.nav-break(v-if="uploader")
-		router-link.nav-el(to="/settings") Settings
+		router-link.nav-el(
+			to="/settings" 
+			:class="{active: isActive('/settings')}") Settings
 		.logout.nav-el(@click="logout") Logout
 </template>
 
@@ -53,16 +58,7 @@ export default {
 			this.$router.push("/login")
 		},
 		isActive(link) {
-			const path = this.$route.path
-			if (link === "/") {
-				return this.$route.path === link
-			}
-
-			if (link === "/audiobook/upload") {
-				return this.$route.path === link
-			}
-
-			return false
+			return this.$route.path === link
 		},
 		nextOrder() {
 			this.$store.commit("nextOrder")
