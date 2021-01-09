@@ -496,7 +496,10 @@ export default {
 		el.addEventListener("timeupdate", e => {
 			this.time = el.currentTime
 		})
-		el.addEventListener("play", e => (this.paused = false))
+		el.addEventListener("play", e => {
+			this.paused = false
+			this.$refs.audio.playbackRate = this.playbackRate
+		})
 		el.addEventListener("pause", e => (this.paused = true))
 		el.addEventListener("ended", this.playbackEnded)
 	},

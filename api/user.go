@@ -182,7 +182,7 @@ func Login(r *gin.RouterGroup, c *conf.Config) {
 			user.Name,
 			user.Role,
 			jwt.StandardClaims{
-				ExpiresAt: time.Now().Add(time.Hour * 24).Unix(),
+				ExpiresAt: time.Now().Add(time.Hour * 24 * 365).Unix(),
 			},
 		}).SignedString(c.Secret)
 		if err != nil {
