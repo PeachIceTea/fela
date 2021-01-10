@@ -22,7 +22,8 @@ type Audiobook struct {
 	CreatedAt string  `db:"created_at" json:"created_at"`
 	UpdatedAt *string `db:"updated_at" json:"updated_at"`
 
-	Files []File `db:"-" json:"files,omitempty"`
+	Files    []File    `db:"-" json:"files,omitempty"`
+	Progress *Progress `db:"-" json:"progress,omitempty"`
 }
 
 // GetAudiobooks - GET /audiobook - Get all audiobooks.
@@ -65,6 +66,16 @@ func GetAudiobook(r *gin.RouterGroup, c *conf.Config) {
 			audiobook.ID)
 		if err != nil {
 			panic(err)
+		}
+
+		audiobook.Progress = &Progress{}
+		claims := getClaims(ctx)
+		err = c.DB.Get(
+			audiobook.Progress, c.TemplateString("get_progress"),
+			claims.ID, audiobook.ID,
+		)
+		if err != nil {
+			audiobook.Progress = nil
 		}
 
 		ctx.JSON(http.StatusOK, conf.M{"audiobook": audiobook})

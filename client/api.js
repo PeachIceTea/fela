@@ -46,6 +46,10 @@ export async function deleteAudiobook(id) {
 	return await DELETE(`/audiobook/${id}`)
 }
 
+export async function updateProgress(audiobook, file, progress) {
+	return await PUT("/progress", {audiobook, file, progress})
+}
+
 // Complex
 // Handles upload
 export function uploadAudiobook(files, progressCallback = () => {}) {

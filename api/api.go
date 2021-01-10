@@ -45,6 +45,7 @@ func RegisterRoutes(r *gin.RouterGroup, c *conf.Config) {
 		Upload(protected, c)
 		UpdateAudiobook(protected, c)
 		DeleteAudiobook(protected, c)
+		UpdateProgress(protected, c)
 
 		protected.GET("/token-test", func(ctx *gin.Context) {
 			ctx.JSON(http.StatusOK, conf.M{"msg": "token is valid"})
