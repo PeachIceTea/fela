@@ -132,7 +132,6 @@ export default {
 				if (this.chapterized) {
 					return true
 				} else {
-					console.log(this.audiobook.title, this.chapters.length)
 					return !!this.chapters && !!this.chapters.length
 				}
 			}
