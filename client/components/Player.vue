@@ -510,7 +510,7 @@ export default {
 			const step = el.currentTime - this.time
 			if(this.time < el.currentTime && step < 1) {
 				this.timeSinceLastSave += el.currentTime - this.time 
-				if(this.timeSinceLastSave > 30) {
+				if(this.timeSinceLastSave > 10) {
 					updateProgress(this.audiobook.id, this.file.id, el.currentTime - 5)
 					this.timeSinceLastSave = 0
 				}
