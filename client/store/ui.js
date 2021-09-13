@@ -1,14 +1,15 @@
 export default {
 	state: {
-		order: 0,
+		order: 4,
 		view: 0,
 		search: "",
+		showUnread: false,
 	},
 	actions: {},
 	mutations: {
 		nextOrder(state) {
 			state.order++
-			state.order %= 4
+			state.order %= 5
 		},
 		nextView(state) {
 			state.view++
@@ -17,6 +18,9 @@ export default {
 		setSearch(state, search) {
 			state.search = search
 		},
+		toggleShowUnread(state) {
+			state.showUnread = !state.showUnread
+		}
 	},
 	getters: {},
 }

@@ -46,8 +46,12 @@ export async function deleteAudiobook(id) {
 	return await DELETE(`/audiobook/${id}`)
 }
 
+export async function getUserProgress() {
+	return await GET("/progress")
+}
+
 export async function updateProgress(audiobook, file, progress) {
-	return await PUT("/progress", {audiobook, file, progress})
+	return await PUT("/progress", { audiobook, file, progress })
 }
 
 // Complex

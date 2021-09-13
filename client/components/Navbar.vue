@@ -5,6 +5,9 @@
 			input.nav-el(type="text" placeholder="Search ..." @input="search")
 			.nav-el(@click="nextView") View: {{ viewName }}
 			.nav-el(@click="nextOrder") Sorted: {{ orderName }}
+			.nav-el(@click="toggleShowUnread")
+				span(v-show="showUnread") Unread books are shown
+				span(v-show="!showUnread") Unread books are hidden
 		.nav-el.nav-break(v-if="uploader")
 		router-link.nav-el(
 			to="/audiobook/upload"
@@ -13,11 +16,11 @@
 		) Upload
 		router-link.nav-el(
 			to="/admin"
-			v-if="admin" 
+			v-if="admin"
 			:class="{active: isActive('/admin')}") Admin
 		.nav-el.nav-break(v-if="uploader")
 		router-link.nav-el(
-			to="/settings" 
+			to="/settings"
 			:class="{active: isActive('/settings')}") Settings
 		.logout.nav-el(@click="logout") Logout
 </template>
@@ -41,6 +44,8 @@ export default {
 					return "Upload Date (Ascending)"
 				case 3:
 					return "Upload Date (Descending)"
+				case 4:
+					return "Recently played"
 			}
 		},
 		viewName() {
@@ -50,6 +55,9 @@ export default {
 				case 1:
 					return "List"
 			}
+		},
+		showUnread() {
+			return this.$store.state.ui.showUnread
 		},
 	},
 	methods: {
@@ -68,6 +76,9 @@ export default {
 		},
 		search(e) {
 			this.$store.commit("setSearch", e.srcElement.value)
+		},
+		toggleShowUnread() {
+			this.$store.commit("toggleShowUnread")
 		},
 	},
 }

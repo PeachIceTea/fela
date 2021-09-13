@@ -1,10 +1,11 @@
-import { getAllAudiobooks, getAudiobook } from "../api"
+import { getAllAudiobooks, getAudiobook, getUserProgress } from "../api"
 
 export default {
 	state: {
 		playing: {},
 		list: [],
 		editing: {},
+		userProgress: []
 	},
 	actions: {
 		async getAudiobooks({ commit }) {
@@ -23,6 +24,14 @@ export default {
 			}
 
 			commit("setEditingAudiobook", audiobook)
+		},
+		async getUserProgress({commit}) {
+			const {progress, err} = await getUserProgress()
+			if (err) {
+				return {err}
+			}
+
+			commit("setUserProgress", progress)
 		},
 		async playAudiobook({ commit }, id) {
 			const { audiobook, err } = await getAudiobook(id)
@@ -43,6 +52,9 @@ export default {
 		setEditingAudiobook(state, audiobook) {
 			state.editing = audiobook
 		},
+		setUserProgress(state, progress) {
+			state.userProgress = progress
+		}
 	},
 	getters: {},
 }

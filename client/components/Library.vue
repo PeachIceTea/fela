@@ -36,7 +36,8 @@ export default {
 		// ui.order or uses ui.search to filter the list. When searching the
 		// order is always best to worst matches.
 		audiobooks() {
-			const arr = this.$store.state.audiobook.list.concat()
+			let arr = this.$store.state.audiobook.list.concat()
+
 			if (this.search) {
 				return new Fuse(arr, {
 					keys: ["title", "author"],
@@ -45,37 +46,75 @@ export default {
 					.map(e => {
 						return e.item
 					})
-			} else {
-				switch (this.$store.state.ui.order) {
-					case 0:
-						return arr.sort((a, b) => {
-							if (a.title < b.title) return -1
-							if (a.title > b.title) return 1
-							return 0
-						})
-					case 1:
-						return arr.sort((a, b) => {
-							if (a.title < b.title) return 1
-							if (a.title > b.title) return -1
-							return 0
-						})
-					case 2:
-						return arr.sort((a, b) => {
-							const aDate = new Date(a.created_at)
-							const bDate = new Date(b.created_at)
-							if (aDate < bDate) return -1
-							if (aDate > bDate) return 1
-							return 0
-						})
-					case 3:
-						return arr.sort((a, b) => {
-							const aDate = new Date(a.created_at)
-							const bDate = new Date(b.created_at)
+			}
+
+			if (!this.showUnread) {
+				arr = arr.filter(audiobook =>
+					this.userProgress.find(
+						progress => progress.audiobook === audiobook.id,
+					),
+				)
+			}
+
+			switch (this.$store.state.ui.order) {
+				case 0:
+					return arr.sort((a, b) => {
+						if (a.title < b.title) return -1
+						if (a.title > b.title) return 1
+						return 0
+					})
+				case 1:
+					return arr.sort((a, b) => {
+						if (a.title < b.title) return 1
+						if (a.title > b.title) return -1
+						return 0
+					})
+				case 2:
+					return arr.sort((a, b) => {
+						const aDate = new Date(a.created_at)
+						const bDate = new Date(b.created_at)
+						if (aDate < bDate) return -1
+						if (aDate > bDate) return 1
+						return 0
+					})
+				case 3:
+					return arr.sort((a, b) => {
+						const aDate = new Date(a.created_at)
+						const bDate = new Date(b.created_at)
+						if (aDate < bDate) return 1
+						if (aDate > bDate) return -1
+						return 0
+					})
+				case 4:
+					const a = arr.sort((a, b) => {
+						const recentA = this.userProgress.find(
+							tmp => tmp.audiobook === a.id,
+						)
+						const recentB = this.userProgress.find(
+							tmp => tmp.audiobook === b.id,
+						)
+						if (recentA && recentB) {
+							const aDate = recentA.updated_at
+								? new Date(recentA.updated_at)
+								: new Date(recentA.created_at)
+							const bDate = recentB.updated_at
+								? new Date(recentB.updated_at)
+								: new Date(recentB.created_at)
 							if (aDate < bDate) return 1
 							if (aDate > bDate) return -1
 							return 0
-						})
-				}
+						}
+
+						if (recentA && !recentB) return -1
+						if (recentB && !recentA) return 1
+
+						if (!recentA && !recentB) {
+							if (a.title < b.title) return -1
+							if (a.title > b.title) return 1
+							return 0
+						}
+					})
+					return a
 			}
 		},
 
@@ -88,6 +127,13 @@ export default {
 
 		coverViewActive() {
 			return this.$store.state.ui.view === 0
+		},
+
+		userProgress() {
+			return this.$store.state.audiobook.userProgress
+		},
+		showUnread() {
+			return this.$store.state.ui.showUnread
 		},
 	},
 	methods: {
@@ -112,6 +158,7 @@ export default {
 	},
 	created() {
 		this.$store.dispatch("getAudiobooks")
+		this.$store.dispatch("getUserProgress")
 	},
 }
 </script>

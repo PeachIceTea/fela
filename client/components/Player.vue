@@ -485,8 +485,12 @@ export default {
 			Object.assign(this, initialState)
 			const progress = this.audiobook.progress
 			if (progress) {
-				for(let i = 0, len = this.audiobook.files.length; i < len; i++) {
-					if(progress.file === this.audiobook.files[i].id){
+				for (
+					let i = 0, len = this.audiobook.files.length;
+					i < len;
+					i++
+				) {
+					if (progress.file === this.audiobook.files[i].id) {
 						this.fileIndex = i
 					}
 				}
@@ -508,10 +512,14 @@ export default {
 		const el = this.$refs.audio
 		el.addEventListener("timeupdate", e => {
 			const step = el.currentTime - this.time
-			if(this.time < el.currentTime && step < 1) {
-				this.timeSinceLastSave += el.currentTime - this.time 
-				if(this.timeSinceLastSave > 10) {
-					updateProgress(this.audiobook.id, this.file.id, el.currentTime - 5)
+			if (this.time < el.currentTime && step < 1) {
+				this.timeSinceLastSave += el.currentTime - this.time
+				if (this.timeSinceLastSave > 10) {
+					updateProgress(
+						this.audiobook.id,
+						this.file.id,
+						el.currentTime - 5,
+					)
 					this.timeSinceLastSave = 0
 				}
 			}

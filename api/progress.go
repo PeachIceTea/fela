@@ -51,3 +51,18 @@ func UpdateProgress(r *gin.RouterGroup, c *conf.Config) {
 		ctx.JSON(http.StatusOK, conf.M{"msg": "progress updated"})
 	})
 }
+
+// GetProgress returns the progress of all audiobooks a user has listened to.
+func GetProgress(r *gin.RouterGroup, c *conf.Config) {
+	r.GET("/progress", func(ctx *gin.Context) {
+		id := getClaims(ctx).ID
+
+		progressList := []Progress{}
+		err := c.DB.Select(&progressList, c.TemplateString("get_progress_user"), id)
+		if err != nil {
+			panic(err)
+		}
+
+		ctx.JSON(http.StatusOK, conf.M{"progress": progressList})
+	})
+}

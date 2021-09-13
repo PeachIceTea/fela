@@ -10,15 +10,6 @@ import user from "./user"
 import ui from "./ui"
 
 export default new Vuex.Store({
-	state: {
-		notifications: [],
-	},
-	actions: {
-		notifyError({ commit }, { msg }) {
-			console.error(msg)
-		},
-	},
-	mutations: {},
 	modules: { auth, audiobook, uploads, user, ui },
 	getters: {
 		authors(state) {
