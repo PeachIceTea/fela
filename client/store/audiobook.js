@@ -25,11 +25,23 @@ export default {
 
 			commit("setEditingAudiobook", audiobook)
 		},
-		async getUserProgress({ commit }) {
+		async getUserProgress({ commit, dispatch }) {
 			const { progress, err } = await getUserProgress()
 			if (err) {
 				return { err }
 			}
+
+			const latestAudio = progress.reduce((a, b) => {
+				const aDate = a.updated_at
+					? new Date(a.updated_at)
+					: new Date(a.created_at)
+				const bDate = b.updated_at
+					? new Date(b.updated_at)
+					: new Date(b.created_at)
+				return aDate > bDate ? a : b
+			})
+
+			dispatch("playAudiobook", latestAudio.audiobook)
 
 			commit("setUserProgress", progress)
 		},

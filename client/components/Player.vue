@@ -248,10 +248,14 @@ export default {
 				}
 			}
 		},
-		toggle() {
+		toggle: async function() {
 			const el = this.$refs.audio
 			if (el) {
-				el.paused ? el.play() : el.pause()
+				try {
+					el.paused ? await el.play() : el.pause()
+				} catch (e) {
+					console.error(e)
+				}
 			}
 		},
 		rewind() {
@@ -481,7 +485,10 @@ export default {
 
 	watch: {
 		audiobook() {
-			this.$refs.audio.pause()
+			try {
+				this.$refs.audio.pause()
+			} catch (e) {}
+
 			Object.assign(this, initialState)
 			const progress = this.audiobook.progress
 			if (progress) {
@@ -494,9 +501,13 @@ export default {
 						this.fileIndex = i
 					}
 				}
-				setTimeout(() => {
+				setTimeout(async () => {
 					this.$refs.audio.currentTime = progress.progress
-					this.$refs.audio.play()
+					try {
+						await this.$refs.audio.play()
+					} catch (e) {
+						this.paused = true
+					}
 				}, 0)
 			}
 		},
