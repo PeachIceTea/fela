@@ -3,7 +3,6 @@ export default {
 		order: 4,
 		view: 0,
 		search: "",
-		showUnread: false,
 	},
 	actions: {},
 	mutations: {
@@ -18,9 +17,6 @@ export default {
 		setSearch(state, search) {
 			state.search = search
 		},
-		toggleShowUnread(state) {
-			state.showUnread = !state.showUnread
-		}
 	},
 	getters: {},
 }

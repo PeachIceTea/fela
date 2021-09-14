@@ -5,7 +5,7 @@ export default {
 		playing: {},
 		list: [],
 		editing: {},
-		userProgress: []
+		userProgress: [],
 	},
 	actions: {
 		async getAudiobooks({ commit }) {
@@ -25,10 +25,10 @@ export default {
 
 			commit("setEditingAudiobook", audiobook)
 		},
-		async getUserProgress({commit}) {
-			const {progress, err} = await getUserProgress()
+		async getUserProgress({ commit }) {
+			const { progress, err } = await getUserProgress()
 			if (err) {
-				return {err}
+				return { err }
 			}
 
 			commit("setUserProgress", progress)
@@ -54,7 +54,7 @@ export default {
 		},
 		setUserProgress(state, progress) {
 			state.userProgress = progress
-		}
+		},
 	},
 	getters: {},
 }

@@ -8,7 +8,7 @@ import App from "./components/App.vue"
 import Login from "./components/Login.vue"
 
 import Main from "./components/Main.vue"
-import Library from "./components/Library.vue"
+import Library from "./components/Library"
 import Upload from "./components/Upload"
 import Edit from "./components/Upload/Edit.vue"
 

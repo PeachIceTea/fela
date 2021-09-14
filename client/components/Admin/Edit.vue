@@ -107,7 +107,6 @@ export default {
 
 			clearTimeout(this.deleting)
 			const res = await deleteUser(this.user.id)
-			console.log(res)
 			if (res.err) {
 				this.err = res.err
 			}
