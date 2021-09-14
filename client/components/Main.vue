@@ -58,7 +58,7 @@ export default {
 
 nav {
 	grid-area: nav-bar;
-	width: 350px;
+	width: 225px;
 	box-shadow: 2px 0px 10px 0px rgba(0, 0, 0, 0.25);
 	z-index: 2;
 }

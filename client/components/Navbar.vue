@@ -80,7 +80,6 @@ export default {
 
 .navbar {
 	background: @highlight;
-
 	height: 100%;
 	padding-top: 15px;
 	user-select: none;

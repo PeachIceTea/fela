@@ -57,7 +57,13 @@ export default {
 	}
 }
 
-@media (max-width: 480px) {
+@media (max-width: 720px) {
+	.cover-library {
+		grid-template-columns: repeat(2, 1fr);
+	}
+}
+
+@media (max-width: 550px) {
 	.cover-library {
 		display: grid;
 		grid-template-columns: repeat(1, 1fr);
