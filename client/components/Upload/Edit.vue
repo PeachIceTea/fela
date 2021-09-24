@@ -53,7 +53,7 @@
 
 <script>
 import { updateAudiobook, deleteAudiobook, coverURL } from "../../api"
-import PlacholderCover from "../../placeholder-cover.jpg"
+import PlacholderCover from "../../images/placeholder-cover.jpg"
 
 export default {
 	data() {

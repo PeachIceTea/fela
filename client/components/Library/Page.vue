@@ -21,7 +21,7 @@
 <script>
 import Fuse from "fuse.js"
 import { coverURL } from "../../api"
-import PlacholderCover from "../../placeholder-cover.jpg"
+import PlacholderCover from "../../images/placeholder-cover.jpg"
 
 import CoverList from "./CoverList.vue"
 import VerticalList from "./VerticalList.vue"
@@ -167,7 +167,7 @@ const sort = {
 
 <style lang="less" scoped>
 .library-header {
-	font-size: 35px;
+	font-size: 34px;
 	font-weight: 600;
 	margin: 0.4em 0 0.3em 0.5em;
 }

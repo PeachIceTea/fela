@@ -68,7 +68,7 @@
 
 <script>
 import { coverURL, audiobookURL, updateProgress } from "../api"
-import PlacholderCover from "../placeholder-cover.jpg"
+import PlacholderCover from "../images/placeholder-cover.jpg"
 
 import Play from "./svg/Play.vue"
 import Pause from "./svg/Pause.vue"
