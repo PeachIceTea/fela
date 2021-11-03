@@ -82,7 +82,6 @@ const initialState = {
 	volume: 1,
 	time: 0,
 	paused: false,
-	playbackRate: 1.0,
 	seekInfo: {
 		show: false,
 		value: 0,
@@ -101,6 +100,11 @@ export default {
 		// Get the audiobook to be played from the store.
 		audiobook() {
 			return this.$store.state.audiobook.playing
+		},
+
+		// Gets the playbackRate
+		playbackRate() {
+			return this.$store.state.ui.playbackRate
 		},
 
 		// Current file
@@ -311,6 +315,7 @@ export default {
 		setPlaybackRate(rate) {
 			this.playbackRate = rate
 			this.$refs.audio.playbackRate = rate
+			this.$store.dispatch("setPlaybackRate", rate)
 		},
 
 		handleVolumeChange(e) {

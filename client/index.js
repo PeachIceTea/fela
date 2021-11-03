@@ -84,6 +84,7 @@ function adminGuard(to, from, next) {
 }
 
 async function main() {
+	store.dispatch("restorePlaybackRate")
 	// Create the Vue instance
 	new Vue({
 		el: document.body,
