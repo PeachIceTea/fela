@@ -1,0 +1,14 @@
+[server]
+port = 3000
+host = "0.0.0.0"
+session_length = 30.4375 # in days.
+
+[database]
+path = "./fela.db"
+
+[argon2]
+memory = 64 # in MB.
+iterations = 10
+parallelism = 4
+salt_length = 16
+hash_length = 32

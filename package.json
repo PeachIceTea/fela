@@ -1,0 +1,31 @@
+{
+	"private": true,
+	"type": "module",
+	"dependencies": {
+		"argon2": "^0.28.3",
+		"better-sqlite3": "^7.4.6",
+		"body-parser": "^1.19.1",
+		"clean-modules": "^2.0.4",
+		"cookie-parser": "^1.4.6",
+		"date-fns": "^2.28.0",
+		"express": "^4.17.2",
+		"morgan": "^1.10.0",
+		"node-schedule": "^2.1.0",
+		"toml": "^3.0.0"
+	},
+	"devDependencies": {
+		"@types/express": "^4.17.13",
+		"concurrently": "^6.4.0",
+		"eslint": "^8.5.0",
+		"eslint-config-prettier": "^8.3.0",
+		"eslint-plugin-prettier": "^4.0.0",
+		"eslint-plugin-simple-import-sort": "^7.0.0",
+		"eslint-plugin-sonarjs": "^0.11.0",
+		"eslint-plugin-unicorn": "^39.0.0",
+		"nodemon": "^2.0.15",
+		"prettier": "^2.5.1"
+	},
+	"scripts": {
+		"dev": "nodemon --watch ./src/ ./src/index.js"
+	}
+}

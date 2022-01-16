@@ -1,0 +1,59 @@
+CREATE TABLE IF NOT EXISTS user (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    name TEXT NOT NULL UNIQUE,
+    password TEXT NOT NULL,
+    role TEXT NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS session (
+    id TEXT NOT NULL PRIMARY KEY,
+    user INTEGER NOT NULL,
+    created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY(user) REFERENCES user(id)
+);
+
+CREATE TABLE IF NOT EXISTS book (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    title TEXT,
+    author TEXT
+);
+
+CREATE TABLE IF NOT EXISTS file (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    path TEXT NOT NULL UNIQUE,
+    duration REAL NOT NULL,
+    position INTEGER NOT NULL,
+
+    book INTEGER NOT NULL,
+
+    FOREIGN KEY(book) REFERENCES book(id)
+);
+
+CREATE TABLE IF NOT EXISTS library (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+
+    user INTEGER NOT NULL,
+    
+    book INTEGER NOT NULL,
+    file INTEGER NOT NULL,
+
+    status TEXT NOT NULL DEFAULT 'listening',
+    progress REAL NOT NULL DEFAULT 0.0,
+
+    FOREIGN KEY(user) REFERENCES user(id),
+    FOREIGN KEY(book) REFERENCES book(id),
+    FOREIGN KEY(file) REFERENCES file(id),
+
+    UNIQUE(user, book)
+);
+
+INSERT OR IGNORE INTO user (name, password, role) 
+VALUES (
+    'admin', 
+    '$argon2id$v=19$m=65536,t=10,p=4$jvZmZIP1U8UMW/H2WLrA0w$U+WP96SXThbZPzcbL1WC84wOEV4mlWQv4zsKZMnnAWo', 
+    'admin');

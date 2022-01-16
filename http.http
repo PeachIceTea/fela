@@ -1,0 +1,73 @@
+### Users.
+### User login.
+POST http://localhost:3000/users/login
+Content-Type: application/json
+
+{
+    "name": "admin",
+    "password": "password"
+}
+
+### User creation.
+POST http://localhost:3000/users/create
+Content-Type: application/json
+
+{
+    "name": "Jonas1",
+    "password": "password"
+}
+
+### Audiobook.
+### All audiobooks.
+GET http://localhost:3000/audiobook
+
+### Get a single audiobook.
+GET http://localhost:3000/audiobook/1
+
+### Audiobook creation.
+POST http://localhost:3000/audiobook
+Content-Type: application/json
+
+{
+    "files": [
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 01.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 02.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 03.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 04.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 05.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 06.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 07.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 08.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 09.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 10.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 11.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 12.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 13.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 14.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 15.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 16.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 17.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 18.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 19.mp3",
+        "/mnt/c/Users/Jonas/Nextcloud/ebooks and audiobooks/Sunreach - Brandon Sanderson/Sunreach (Unabridged) - 20.mp3"
+    ]
+}
+
+### Library.
+### Get user library.
+GET http://localhost:3000/library
+
+### Add audiobook to library.
+POST http://localhost:3000/library/add
+Content-Type: application/json
+
+{
+    "bookID": 1
+}
+
+### File getters.
+### Get cover.
+GET http://localhost:3000/file/cover/1.jpg
+
+### Get audio.
+GET http://localhost:3000/file/audio/1
