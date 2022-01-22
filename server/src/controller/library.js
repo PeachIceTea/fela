@@ -69,12 +69,18 @@ router.put(
 	"/library/:bookID/progress",
 	requireAuthentication,
 	(request, response) => {
-		let { bookID, fileID, progress } = request.body
+		let { bookID } = request.params
 		bookID = Number.parseInt(bookID)
-		fileID = Number.parseInt(fileID)
-		if (!bookID || !fileID) {
+		if (!bookID) {
 			return response.status(400).json({
-				error: "Invalid id.",
+				error: "Invalid audiobook id.",
+			})
+		}
+		let { fileID, progress } = request.body
+		fileID = Number.parseInt(fileID)
+		if (!fileID) {
+			return response.status(400).json({
+				error: "Invalid file id.",
 			})
 		}
 		progress = Number.parseFloat(progress)
