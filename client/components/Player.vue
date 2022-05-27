@@ -252,15 +252,22 @@ export default {
 				}
 			}
 		},
-		toggle: async function() {
-			const el = this.$refs.audio
-			if (el) {
-				try {
-					el.paused ? await el.play() : el.pause()
-				} catch (e) {
-					console.error(e)
-				}
+		play: async function() {
+			try {
+				await this.$refs.audio.play()
+			} catch (e) {
+				console.error(e)
 			}
+		},
+		pause: async function() {
+			try {
+				await this.$refs.audio.pause()
+			} catch (e) {
+				console.error(e)
+			}
+		},
+		toggle: async function() {
+			this.$refs.audio.paused ? this.play() : this.pause()
 		},
 		rewind() {
 			let newTime = this.time - 30
@@ -515,6 +522,18 @@ export default {
 					}
 				}, 0)
 			}
+			if ("mediaSession" in navigator)
+				navigator.mediaSession.metadata = new MediaMetadata({
+					title: this.audiobook.title,
+					artist: this.audiobook.author,
+					artwork: [{ src: this.coverURL(this.audiobook.id) }],
+				})
+		},
+		paused() {
+			if ("mediaSession" in navigator)
+				navigator.mediaSession.playbackState = this.paused
+					? "paused"
+					: "playing"
 		},
 	},
 
@@ -547,6 +566,24 @@ export default {
 		})
 		el.addEventListener("pause", e => (this.paused = true))
 		el.addEventListener("ended", this.playbackEnded)
+
+		if ("mediaSession" in navigator) {
+			navigator.mediaSession.setActionHandler("play", () => {
+				this.play()
+			})
+			navigator.mediaSession.setActionHandler("pause", () => {
+				this.pause()
+			})
+			navigator.mediaSession.setActionHandler("seekto", to => {
+				this.seek(to.seekTime)
+			})
+			navigator.mediaSession.setActionHandler("seekbackward", to => {
+				this.seek(this.time - (to.seekOffset ? to.seekOffset : 30))
+			})
+			navigator.mediaSession.setActionHandler("seekforward", to => {
+				this.seek(this.time + (to.seekOffset ? to.seekOffset : 30))
+			})
+		}
 	},
 
 	// Removes the keyboard handler, this has to be done for the keyboard
